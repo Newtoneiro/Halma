@@ -17,8 +17,8 @@ WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Halma')
 
 def transfer_into_rows_and_cols(x, y):
-    row = x//SQUARE_SIZE
-    col = y//SQUARE_SIZE
+    row = y//SQUARE_SIZE
+    col = x//SQUARE_SIZE
     return row, col
 
 def main():
@@ -42,17 +42,20 @@ def main():
                         selected_checker.change_selected(True)
 
                 elif selected_checker != 0:
-                    selected_checker.change_selected(False)
                     x, y = pygame.mouse.get_pos()
                     row, col = transfer_into_rows_and_cols(x, y)
-                    board.move_checker(selected_checker, row, col)
-                    selected_checker = 0
+                    if board.get_checker(row, col) != 0 or (row, col) not in board.valid_moves(selected_checker):
+                        selected_checker.change_selected(False)
+                        selected_checker = 0
+                    else:
+                        board.move_checker(selected_checker, row, col)
+                        selected_checker.change_selected(False)
+                        selected_checker = 0
                 
                 else:
                     pass
 
 
-        board.draw_squares(WIN)
         board.draw(WIN)
         pygame.display.update()
     pygame.quit()

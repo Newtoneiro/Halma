@@ -18,10 +18,11 @@ class Checker:
             color = BLACK
         pygame.draw.circle(win, color, (self.x, self.y), SQUARE_SIZE//2 - BORDER)
         pygame.draw.circle(win, self.color, (self.x, self.y), SQUARE_SIZE//2 - OUTLINE - BORDER)
+        
 
     def get_position(self):
-        self.x = self.row * SQUARE_SIZE + SQUARE_SIZE//2
-        self.y = self.col * SQUARE_SIZE + SQUARE_SIZE//2
+        self.x = self.col * SQUARE_SIZE + SQUARE_SIZE//2
+        self.y = self.row * SQUARE_SIZE + SQUARE_SIZE//2
 
     def move(self, row, col):
         self.row = row
