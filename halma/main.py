@@ -7,7 +7,6 @@ from constants import *
 from board import Board
 from checker import Checker
 
-
 FPS = 60
 
 pygame.init()
@@ -44,17 +43,14 @@ def main():
                 elif selected_checker != 0:
                     x, y = pygame.mouse.get_pos()
                     row, col = transfer_into_rows_and_cols(x, y)
-                    if board.get_checker(row, col) != 0 or (row, col) not in board.valid_moves(selected_checker):
+                    all_possible_moves, jumped_moves = board.valid_moves(selected_checker)
+                    if board.get_checker(row, col) != 0 or (row, col) not in all_possible_moves:
                         selected_checker.change_selected(False)
                         selected_checker = 0
                     else:
                         board.move_checker(selected_checker, row, col)
                         selected_checker.change_selected(False)
                         selected_checker = 0
-                
-                else:
-                    pass
-
 
         board.draw(WIN)
         pygame.display.update()

@@ -63,68 +63,82 @@ class Board:
         self.board = board
     
     def space_right(self, row, col):
-        if col == COLS - 1:
+        if col >= COLS - 1:
             return None
         if self.get_checker(row, col+1) == 0:
-            return (row, col+1)
-        return None
-    
+            return (True, row, col+1)
+        return (False, row, col+1, 'r')
+        
+
     def space_left(self, row, col):
-        if col == 0:
+        if col <= 0:
             return None
         if self.get_checker(row, col-1) == 0:
-            return (row, col-1)
-        return None
+            return (True, row, col-1)
+        return (False, row, col-1, 'l')
     
     def space_down(self, row, col):
-        if row == COLS - 1:
+        if row >= COLS - 1:
             return None
         if self.get_checker(row+1, col) == 0:
-            return (row+1, col)
-        return None
+            return (True, row+1, col)
+        return (False, row+1, col, 'd')
     
     def space_up(self, row, col):
-        if row == 0:
+        if row <= 0:
             return None
         if self.get_checker(row-1, col) == 0:
-            return (row-1, col)
-        return None
+            return (True, row-1, col)
+        return (False, row-1, col, 'u')
     
     def crosswise_up_right(self, row, col):
-        if row == 0 or col == COLS:
+        if row <= 0 or col >= COLS-1:
             return None
         if self.get_checker(row-1, col+1) == 0:
-            return (row-1, col+1)
-        return None
+            return (True, row-1, col+1)
+        return (False, row-1, col+1, 'ur')
 
     
     def crosswise_up_left(self, row, col):
-        if row == 0 or col == 0:
+        if row <= 0 or col <= 0:
             return None
         if self.get_checker(row-1, col-1) == 0:
-            return (row-1, col-1)
-        return None
+            return (True, row-1, col-1)
+        return (False, row-1, col-1, 'ul')
 
     
     def crosswise_down_right(self, row, col):
-        if row == ROWS or col == COLS:
+        if row >= ROWS-1 or col >= COLS-1:
             return None
         if self.get_checker(row+1, col+1) == 0:
-            return (row+1, col+1)
-        return None
+            return (True, row+1, col+1)
+        return (False, row+1, col+1, 'dr')
 
     
     def crosswise_down_left(self, row, col):
-        if row == ROWS or col == 0:
+        if row >= ROWS-1 or col <= 0:
             return None
         if self.get_checker(row+1, col-1) == 0:
-            return (row+1, col-1)
-        return None
+            return (True, row+1, col-1)
+        return (False, row+1, col-1, 'dl')
 
     def valid_moves(self, checker):
         row = checker.row
         col = checker.col
-        valid_moves = [
+        possible_moves = self.check_all_directions(row, col)
+        valid_moves = []
+        possible_jumps = []
+        for element in possible_moves:
+            if element:
+                if element[0]:
+                    valid_moves.append((element[1], element[2]))
+                else:
+                    possible_jumps.append((element[1], element[2], element[3]))
+        all_moves = valid_moves + self.check_possible_jumps(possible_jumps)
+        return all_moves, self.check_possible_jumps(possible_jumps)
+    
+    def check_all_directions(self, row, col):
+        possible_moves = [
             self.space_down(row, col),
             self.space_left(row, col),
             self.space_right(row, col),
@@ -132,13 +146,40 @@ class Board:
             self.crosswise_down_left(row, col),
             self.crosswise_down_right(row, col),
             self.crosswise_up_left(row, col),
-            self.crosswise_up_right(row, col)
+            self.crosswise_up_right(row, col),
         ]
-        
-        return valid_moves
+        return possible_moves
     
+    def check_possible_jumps(self, possible_jumps):
+        valid_moves = []
+        for element in possible_jumps:
+            if element[2] == 'r':
+                valid_moves.append(self.space_right(element[0], element[1]))
+            if element[2] == 'l':
+                valid_moves.append(self.space_left(element[0], element[1]))
+            if element[2] == 'u':
+                valid_moves.append(self.space_up(element[0], element[1]))
+            if element[2] == 'd':
+                valid_moves.append(self.space_down(element[0], element[1]))
+            if element[2] == 'ur':
+                valid_moves.append(self.crosswise_up_right(element[0], element[1]))
+            if element[2] == 'ul':
+                valid_moves.append(self.crosswise_up_left(element[0], element[1]))
+            if element[2] == 'dr':
+                valid_moves.append(self.crosswise_down_right(element[0], element[1]))
+            if element[2] == 'dl':
+                valid_moves.append(self.crosswise_down_left(element[0], element[1]))
+        possible_moves = []
+        for move in  valid_moves:
+            if move:
+                if move[0] is True:
+                    possible_moves.append((move[1], move[2]))
+        
+        return possible_moves
+            
+
     def draw_valid_moves_indicators(self, checker, win):
-        valid_moves = self.valid_moves(checker)
+        valid_moves, unimportant = self.valid_moves(checker)
         for element in valid_moves:
             if element:
                 row, col = element[0], element[1]
