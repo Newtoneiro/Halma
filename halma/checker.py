@@ -11,6 +11,7 @@ class Checker:
         self.color = color
         self.selected = False
 
+
     def draw(self, win):
         if self.selected:
             color = GREEN
@@ -18,7 +19,7 @@ class Checker:
             color = BLACK
         pygame.draw.circle(win, color, (self.x, self.y), SQUARE_SIZE//2 - BORDER)
         pygame.draw.circle(win, self.color, (self.x, self.y), SQUARE_SIZE//2 - OUTLINE - BORDER)
-        
+
 
     def get_position(self):
         self.x = self.col * SQUARE_SIZE + SQUARE_SIZE//2
@@ -31,3 +32,5 @@ class Checker:
 
     def change_selected(self, value):
         self.selected = value
+
+

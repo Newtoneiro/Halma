@@ -6,6 +6,7 @@ from pygame.locals import *
 from constants import *
 from board import Board
 from checker import Checker
+from game import Game
 
 FPS = 60
 
@@ -24,7 +25,7 @@ def main():
     run = True
     clock = pygame.time.Clock()
     board = Board()
-    selected_checker = 0
+    game = Game(WIN, board)
 
     while run:
         clock.tick(FPS)
@@ -33,27 +34,31 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if selected_checker == 0:
+                if game.selected_checker() == 0:
                     x, y = pygame.mouse.get_pos()
                     row, col = transfer_into_rows_and_cols(x, y)
-                    selected_checker = board.get_checker(row, col)
-                    if selected_checker != 0:
-                        selected_checker.change_selected(True)
+                    if game.board().get_checker(row, col) != 0:
+                        if game.board().get_checker(row, col).color == game.turn:
+                            game.change_selected_checker(game.board().get_checker(row, col))
+                            if game.selected_checker() != 0:
+                                game.selected_checker().change_selected(True)
 
-                elif selected_checker != 0:
+                elif game.selected_checker() != 0:
                     x, y = pygame.mouse.get_pos()
                     row, col = transfer_into_rows_and_cols(x, y)
-                    all_possible_moves, jumped_moves = board.valid_moves(selected_checker)
-                    if board.get_checker(row, col) != 0 or (row, col) not in all_possible_moves:
-                        selected_checker.change_selected(False)
-                        selected_checker = 0
+                    # checker_row = game.selected_checker().row
+                    # checker_col = game.selected_checker().col
+                    all_possible_moves = game.board().valid_moves(game.selected_checker())
+                    if game.board().get_checker(row, col) != 0 or (row, col) not in all_possible_moves:
+                        game.selected_checker().change_selected(False)
+                        game.change_selected_checker(0)
                     else:
-                        board.move_checker(selected_checker, row, col)
-                        selected_checker.change_selected(False)
-                        selected_checker = 0
+                        game.board().move_checker(game.selected_checker(), row, col)
+                        game.selected_checker().change_selected(False)
+                        game.change_selected_checker(0)
+                        game.change_turn()
 
-        board.draw(WIN)
-        pygame.display.update()
+        game.update()
     pygame.quit()
 
 

@@ -38,7 +38,7 @@ class Board:
 
         for row in {2, 13}:
             for col in {3, 13}:
-                pygame.draw.rect(win, RED, (col * SQUARE_SIZE, row * SQUARE_SIZE, (2 * OUTLINE), (SQUARE_SIZE)))   
+                pygame.draw.rect(win, RED, (col * SQUARE_SIZE, row * SQUARE_SIZE, (2 * OUTLINE), (SQUARE_SIZE)))
 
     def create_board(self):
         board = []
@@ -61,82 +61,156 @@ class Board:
                     n_row.append(0)
             board.append(n_row)
         self.board = board
-    
+
     def space_right(self, row, col):
         if col >= COLS - 1:
             return None
         if self.get_checker(row, col+1) == 0:
-            return (True, row, col+1)
-        return (False, row, col+1, 'r')
-        
+            return (row, col+1)
+        return self.check_jump_right(row, col)
 
     def space_left(self, row, col):
         if col <= 0:
             return None
         if self.get_checker(row, col-1) == 0:
-            return (True, row, col-1)
-        return (False, row, col-1, 'l')
-    
+            return (row, col-1)
+        return self.check_jump_left(row, col)
+
     def space_down(self, row, col):
-        if row >= COLS - 1:
+        if row >= ROWS - 1:
             return None
         if self.get_checker(row+1, col) == 0:
-            return (True, row+1, col)
-        return (False, row+1, col, 'd')
-    
+            return (row+1, col)
+        return self.check_jump_down(row, col)
+
     def space_up(self, row, col):
         if row <= 0:
             return None
         if self.get_checker(row-1, col) == 0:
-            return (True, row-1, col)
-        return (False, row-1, col, 'u')
-    
+            return (row-1, col)
+        return self.check_jump_up(row, col)
+
     def crosswise_up_right(self, row, col):
         if row <= 0 or col >= COLS-1:
             return None
         if self.get_checker(row-1, col+1) == 0:
-            return (True, row-1, col+1)
-        return (False, row-1, col+1, 'ur')
+            return (row-1, col+1)
+        return self.check_jump_up_right(row, col)
 
-    
     def crosswise_up_left(self, row, col):
         if row <= 0 or col <= 0:
             return None
         if self.get_checker(row-1, col-1) == 0:
-            return (True, row-1, col-1)
-        return (False, row-1, col-1, 'ul')
+            return (row-1, col-1)
+        return self.check_jump_up_left(row, col)
 
-    
     def crosswise_down_right(self, row, col):
         if row >= ROWS-1 or col >= COLS-1:
             return None
         if self.get_checker(row+1, col+1) == 0:
-            return (True, row+1, col+1)
-        return (False, row+1, col+1, 'dr')
+            return (row+1, col+1)
+        return self.check_jump_down_right(row, col)
 
-    
     def crosswise_down_left(self, row, col):
         if row >= ROWS-1 or col <= 0:
             return None
         if self.get_checker(row+1, col-1) == 0:
-            return (True, row+1, col-1)
-        return (False, row+1, col-1, 'dl')
+            return (row+1, col-1)
+        return self.check_jump_down_left(row, col)
+
+    def check_jump_up(self, row, col):
+        if row <=1:
+            return None
+        if self.get_checker(row-1, col) != 0 and self.get_checker(row-2, col) == 0:
+            return row-2, col
+        return None
+
+    def check_jump_down(self, row, col):
+        if row >= ROWS - 2:
+            return None
+        if self.get_checker(row+1, col) != 0 and self.get_checker(row+2, col) == 0:
+            return row+2, col
+        return None
+
+    def check_jump_left(self, row, col):
+        if col <= 1:
+            return None
+        if self.get_checker(row, col-1) != 0 and self.get_checker(row, col-2) == 0:
+            return row, col-2
+        return None
+
+    def check_jump_right(self, row, col):
+        if col >= COLS - 2:
+            return None
+        if self.get_checker(row, col+1) != 0 and self.get_checker(row, col+2) == 0:
+            return row, col+2
+        return None
+
+    def check_jump_up_right(self, row, col):
+        if col >= COLS - 2 or row <= 1:
+            return None
+        if self.get_checker(row-1, col+1) != 0 and self.get_checker(row-2, col+2) == 0:
+            return row-2, col+2
+        return None
+
+    def check_jump_up_left(self, row, col):
+        if col <= 1 or row <= 1:
+            return None
+        if self.get_checker(row-1, col-1) != 0 and self.get_checker(row-2, col-2) == 0:
+            return row-2, col-2
+        return None
+
+    def check_jump_down_left(self, row, col):
+        if col <= 1 or row >= ROWS-2:
+            return None
+        if self.get_checker(row+1, col-1) != 0 and self.get_checker(row+2, col-2) == 0:
+            return row+2, col-2
+        return None
+
+    def check_jump_down_right(self, row, col):
+        if col >= COLS-2 or row >= ROWS-2:
+            return None
+        if self.get_checker(row+1, col+1) != 0 and self.get_checker(row+2, col+2) == 0:
+            return row+2, col+2
+        return None
+
+    def check_jump_all_directions(self, row, col, already_jumped=None):
+        if not already_jumped:
+            already_jumped = []
+        jumped_moves = []
+        jumped_moves += already_jumped
+        if self.check_jump_up(row, col):
+            jumped_moves.append(self.check_jump_up(row, col))
+        if self.check_jump_down(row, col):
+            jumped_moves.append(self.check_jump_down(row, col))
+        if self.check_jump_left(row, col):
+            jumped_moves.append(self.check_jump_left(row, col))
+        if self.check_jump_right(row, col):
+            jumped_moves.append(self.check_jump_right(row, col))
+        if self.check_jump_up_left(row, col):
+            jumped_moves.append(self.check_jump_up_left(row, col))
+        if self.check_jump_up_right(row, col):
+            jumped_moves.append(self.check_jump_up_right(row, col))
+        if self.check_jump_down_left(row, col):
+            jumped_moves.append(self.check_jump_down_left(row, col))
+        if self.check_jump_down_right(row, col):
+            jumped_moves.append(self.check_jump_down_right(row, col))
+
+        for move in jumped_moves:
+            if move not in already_jumped:
+                new_moves = self.check_jump_all_directions(move[0], move[1], jumped_moves)
+                for move in new_moves:
+                    if move not in jumped_moves:
+                        jumped_moves.append(move)
+        return jumped_moves
+
 
     def valid_moves(self, checker):
-        row = checker.row
-        col = checker.col
-        possible_moves = self.check_all_directions(row, col)
-        valid_moves = []
-        possible_jumps = []
-        for element in possible_moves:
-            if element:
-                if element[0]:
-                    valid_moves.append((element[1], element[2]))
-                else:
-                    possible_jumps.append((element[1], element[2], element[3]))
-        all_moves = valid_moves + self.check_possible_jumps(possible_jumps)
-        return all_moves, self.check_possible_jumps(possible_jumps)
-    
+        possible_moves = self.check_all_directions(checker.row, checker.col)
+        jumped_moves = self.check_jump_all_directions(checker.row, checker.col)
+        return possible_moves + jumped_moves
+
+
     def check_all_directions(self, row, col):
         possible_moves = [
             self.space_down(row, col),
@@ -149,43 +223,15 @@ class Board:
             self.crosswise_up_right(row, col),
         ]
         return possible_moves
-    
-    def check_possible_jumps(self, possible_jumps):
-        valid_moves = []
-        for element in possible_jumps:
-            if element[2] == 'r':
-                valid_moves.append(self.space_right(element[0], element[1]))
-            if element[2] == 'l':
-                valid_moves.append(self.space_left(element[0], element[1]))
-            if element[2] == 'u':
-                valid_moves.append(self.space_up(element[0], element[1]))
-            if element[2] == 'd':
-                valid_moves.append(self.space_down(element[0], element[1]))
-            if element[2] == 'ur':
-                valid_moves.append(self.crosswise_up_right(element[0], element[1]))
-            if element[2] == 'ul':
-                valid_moves.append(self.crosswise_up_left(element[0], element[1]))
-            if element[2] == 'dr':
-                valid_moves.append(self.crosswise_down_right(element[0], element[1]))
-            if element[2] == 'dl':
-                valid_moves.append(self.crosswise_down_left(element[0], element[1]))
-        possible_moves = []
-        for move in  valid_moves:
-            if move:
-                if move[0] is True:
-                    possible_moves.append((move[1], move[2]))
-        
-        return possible_moves
-            
 
     def draw_valid_moves_indicators(self, checker, win):
-        valid_moves, unimportant = self.valid_moves(checker)
+        valid_moves = self.valid_moves(checker)
         for element in valid_moves:
             if element:
                 row, col = element[0], element[1]
                 pygame.draw.circle(win, GREEN, (col*SQUARE_SIZE + SQUARE_SIZE//2, row*SQUARE_SIZE + SQUARE_SIZE//2), 5)
 
- 
+
     def get_checker(self, row, col):
         return self.board[row][col]
 
