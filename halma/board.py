@@ -3,10 +3,12 @@ from constants import *
 from checker import Checker
 
 class Board:
-    def __init__(self):
+    def __init__(self, player1, player2):
         self.rows = ROWS
         self.cols = COLS
-        self.create_board()
+        self.create_board(player1, player2)
+        self.player1 = player1
+        self.player2 = player2
 
     def draw_squares(self, win):
         win.fill(BLACK)
@@ -16,6 +18,7 @@ class Board:
                 pygame.draw.rect(win, BLACK, (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE + OUTLINE, SQUARE_SIZE + OUTLINE))
                 pygame.draw.rect(win, YELLOW, (col * SQUARE_SIZE + OUTLINE, row * SQUARE_SIZE + OUTLINE, (SQUARE_SIZE - OUTLINE), (SQUARE_SIZE - OUTLINE)))
 
+        # These funny lines
         for row in {4, 12}:
             for col in {0, 14}:
                 pygame.draw.rect(win, RED, (col * SQUARE_SIZE, row * SQUARE_SIZE, (2 * SQUARE_SIZE), (2* OUTLINE)))
@@ -40,23 +43,75 @@ class Board:
             for col in {3, 13}:
                 pygame.draw.rect(win, RED, (col * SQUARE_SIZE, row * SQUARE_SIZE, (2 * OUTLINE), (SQUARE_SIZE)))
 
-    def create_board(self):
+        for row in {5, 11}:
+            for col in {0, 14}:
+                pygame.draw.rect(win, L_BLUE, (col * SQUARE_SIZE, row * SQUARE_SIZE, (2 * SQUARE_SIZE), (2 * OUTLINE)))
+
+        for row in {4, 11}:
+            for col in {2, 14}:
+                pygame.draw.rect(win, L_BLUE, (col * SQUARE_SIZE, row * SQUARE_SIZE, (2 * OUTLINE), (SQUARE_SIZE)))
+
+        for row in {4, 12}:
+            for col in {2, 13}:
+                pygame.draw.rect(win, L_BLUE, (col * SQUARE_SIZE, row * SQUARE_SIZE, (SQUARE_SIZE), (2 * OUTLINE)))
+
+        for row in {3, 12}:
+            for col in {3, 13}:
+                pygame.draw.rect(win, L_BLUE, (col * SQUARE_SIZE, row * SQUARE_SIZE, (2 * OUTLINE), (SQUARE_SIZE)))
+
+        for row in {3, 13}:
+            for col in {3, 12}:
+                pygame.draw.rect(win, L_BLUE, (col * SQUARE_SIZE, row * SQUARE_SIZE, (SQUARE_SIZE), (2 * OUTLINE)))
+
+        for row in {2, 13}:
+            for col in {4, 12}:
+                pygame.draw.rect(win, L_BLUE, (col * SQUARE_SIZE, row * SQUARE_SIZE, (2 * OUTLINE), (SQUARE_SIZE)))
+
+        for row in {2, 14}:
+            for col in {4, 11}:
+                pygame.draw.rect(win, L_BLUE, (col * SQUARE_SIZE, row * SQUARE_SIZE, (SQUARE_SIZE), (2 * OUTLINE)))
+
+        for row in {0, 14}:
+            for col in {5, 11}:
+                pygame.draw.rect(win, L_BLUE, (col * SQUARE_SIZE, row * SQUARE_SIZE, (2 * OUTLINE), (2 * SQUARE_SIZE)))
+
+    def create_board(self, player1, player2):
         board = []
         for row in range(0, self.rows):
             n_row = []
             for col in range(0, self.cols):
-                if row in {0, 1} and col in {0, 1, 2, 3}:
-                    n_row.append(Checker(row, col, RED))
-                elif row == 2 and col in {0, 1, 2}:
-                    n_row.append(Checker(row, col, RED))
-                elif row == 3 and col in {0, 1}:
-                    n_row.append(Checker(row, col, RED))
-                elif row == 12 and col in {14, 15}:
-                    n_row.append(Checker(row, col, BLUE))
-                elif row == 13 and col in {13, 14, 15}:
-                    n_row.append(Checker(row, col, BLUE))
-                elif row in {14, 15} and col in {12, 13, 14, 15}:
-                    n_row.append(Checker(row, col, BLUE))
+                if row in {0, 1} and col in {0, 1, 2, 3, 4}:
+                    checker = Checker(row, col, RED)
+                    player1.add_checker(checker)
+                    n_row.append(checker)
+                elif row == 2 and col in {0, 1, 2, 3}:
+                    checker = Checker(row, col, RED)
+                    player1.add_checker(checker)
+                    n_row.append(checker)
+                elif row == 3 and col in {0, 1, 2}:
+                    checker = Checker(row, col, RED)
+                    player1.add_checker(checker)
+                    n_row.append(checker)
+                elif row == 4 and col in {0, 1}:
+                    checker = Checker(row, col, RED)
+                    player1.add_checker(checker)
+                    n_row.append(checker)
+                elif row == 11 and col in {14, 15}:
+                    checker = Checker(row, col, BLUE)
+                    player2.add_checker(checker)
+                    n_row.append(checker)
+                elif row == 12 and col in {13, 14, 15}:
+                    checker = Checker(row, col, BLUE)
+                    player2.add_checker(checker)
+                    n_row.append(checker)
+                elif row == 13 and col in {12, 13, 14, 15}:
+                    checker = Checker(row, col, BLUE)
+                    player2.add_checker(checker)
+                    n_row.append(checker)
+                elif row in {14, 15} and col in {11, 12, 13, 14, 15}:
+                    checker = Checker(row, col, BLUE)
+                    player2.add_checker(checker)
+                    n_row.append(checker)
                 else:
                     n_row.append(0)
             board.append(n_row)
@@ -230,7 +285,6 @@ class Board:
             if element:
                 row, col = element[0], element[1]
                 pygame.draw.circle(win, GREEN, (col*SQUARE_SIZE + SQUARE_SIZE//2, row*SQUARE_SIZE + SQUARE_SIZE//2), 5)
-
 
     def get_checker(self, row, col):
         return self.board[row][col]

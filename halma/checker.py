@@ -10,16 +10,44 @@ class Checker:
         self.get_position()
         self.color = color
         self.selected = False
+        self.target = False
+        self.home = True
+        if self.color == RED:
+            self.home_base = RED_BASE
+            self.target_base = BLUE_BASE
+        if self.color == BLUE:
+            self.home_base = BLUE_BASE
+            self.target_base = RED_BASE
 
+    def update_status(self):
+        if (self.row, self.col) in self.target_base:
+            self.target = True
+        else:
+            self.target = False
 
     def draw(self, win):
+        self.update_status()
         if self.selected:
             color = GREEN
         elif not self.selected:
             color = BLACK
+            if self.target:
+                color = L_BLUE
+
         pygame.draw.circle(win, color, (self.x, self.y), SQUARE_SIZE//2 - BORDER)
         pygame.draw.circle(win, self.color, (self.x, self.y), SQUARE_SIZE//2 - OUTLINE - BORDER)
 
+    def change_target(self):
+        if self.target:
+            self.target = False
+        elif not self.target:
+            self.target = True
+
+    def change_home(self):
+        if self.home:
+            self.home = False
+        elif not self.home:
+            self.home = True
 
     def get_position(self):
         self.x = self.col * SQUARE_SIZE + SQUARE_SIZE//2
