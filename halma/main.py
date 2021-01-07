@@ -21,14 +21,16 @@ def transfer_into_rows_and_cols(x, y):
     col = x//SQUARE_SIZE
     return row, col
 
-player1 = Player('Arnold')
-player2 = Player('Boczek')
 
 def main():
     run = True
     clock = pygame.time.Clock()
+    player1 = Player('Arnold', RED)
+    player2 = Player('Boczek', BLUE)
     board = Board(player1, player2)
     game = Game(WIN, board)
+    player1.add_game(game)
+    player2.add_game(game)
 
     while run:
         clock.tick(FPS)

@@ -259,10 +259,61 @@ class Board:
                         jumped_moves.append(move)
         return jumped_moves
 
+    def get_possible_swaps(self, checker):
+        possible_swaps = []
+        if col >= COLS - 1:
+            if self.get_checker(row, col+1):
+                possible_swaps.append(row, col+1)
+
+        if col <= 0:
+            if self.get_checker(row, col-1):
+                possible_swaps.append(row, col-1)
+
+        if row >= ROWS - 1:
+            if self.get_checker(row+1, col):
+                possible_swaps.append(row+1, col)
+
+        if row <= 0:
+            if self.get_checker(row-1, col):
+                possible_swaps.append(row-1, col)
+
+        if row <= 0 or col >= COLS-1:
+            if self.get_checker(row-1, col+1):
+                possible_swaps.append(row-1, col+1)
+
+        if row <= 0 or col <= 0:
+            if self.get_checker(row-1, col-1):
+                possible_swaps.append(row-1, col-1)
+
+        if row >= ROWS-1 or col >= COLS-1:
+            if self.get_checker(row+1, col+1):
+                possible_swaps.append(row+1, col+1)
+
+        if row >= ROWS-1 or col <= 0:
+            if self.get_checker(row+1, col-1):
+                possible_swaps.append(row+1, col-1)
+
+        return possible_swaps
+
 
     def valid_moves(self, checker):
         possible_moves = self.check_all_directions(checker.row, checker.col)
         jumped_moves = self.check_jump_all_directions(checker.row, checker.col)
+        if checker.target:         # once target enters enemy base, it cannot leave it
+            base = RED_BASE
+            if checker.color == RED:
+                base = BLUE_BASE
+            possible_moves_in_base = []
+            jumped_moves_in_base = []
+            for move in possible_moves:
+                if move in base:
+                    possible_moves_in_base.append(move)
+            for jump in jumped_moves:
+                if jump in base:
+                    jumped_moves_in_base.append(jump)
+            possible_moves = possible_moves_in_base
+            jumped_moves = jumped_moves_in_base
+
         return possible_moves + jumped_moves
 
 
@@ -302,8 +353,3 @@ class Board:
                     checker.draw(win)
                     if checker.selected:
                         self.draw_valid_moves_indicators(checker, win)
-
-
-
-
-

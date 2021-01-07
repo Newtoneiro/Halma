@@ -12,18 +12,40 @@ class Checker:
         self.selected = False
         self.target = False
         self.home = True
+        self.useless_moves = []
+        self.made_moves = []
         if self.color == RED:
             self.home_base = RED_BASE
             self.target_base = BLUE_BASE
+
         if self.color == BLUE:
             self.home_base = BLUE_BASE
             self.target_base = RED_BASE
+
+        if self.color == YELLOW:
+            self.home_base = YELLOW_BASE
+            self.target_base = GREEN_BASE
+
+        if self.color == GREEN:
+            self.home_base = GREEN_BASE
+            self.target_base = YELLOW_BASE
+
+    def add_useless_move(self, move):
+        self.useless_moves.append(move)
+
+    def add_made_move(self, move):
+        self.made_moves.append(move)
 
     def update_status(self):
         if (self.row, self.col) in self.target_base:
             self.target = True
         else:
             self.target = False
+
+        if (self.row, self.col) in self.home_base:
+            self.home = True
+        else:
+            self.home = False
 
     def draw(self, win):
         self.update_status()
