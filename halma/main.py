@@ -27,10 +27,14 @@ def main():
     clock = pygame.time.Clock()
     player1 = Player('Arnold', RED)
     player2 = Player('Boczek', BLUE)
-    board = Board(player1, player2)
+    player3 = Player('Boczek', GREEN)
+    player4 = Player('Boczek', YELLOW)
+    board = Board(player1, player2, player3, player4)
     game = Game(WIN, board)
-    player1.add_game(game)
-    player2.add_game(game)
+    game.board().player1.add_game(game)
+    game.board().player2.add_game(game)
+    game.board().player3.add_game(game)
+    game.board().player4.add_game(game)
 
     while run:
         clock.tick(FPS)

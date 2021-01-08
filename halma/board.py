@@ -3,12 +3,20 @@ from constants import *
 from checker import Checker
 
 class Board:
-    def __init__(self, player1, player2):
+    def __init__(self, player1, player2, player3=None, player4=None):
         self.rows = ROWS
         self.cols = COLS
-        self.create_board(player1, player2)
+        if player3:
+            self.player3 = player3
+        else:
+            self.player3 = None
+        if player4:
+            self.player4 = player4
+        else:
+            self.player4 = None
         self.player1 = player1
         self.player2 = player2
+        self.create_board()
 
     def draw_squares(self, win):
         win.fill(BLACK)
@@ -75,42 +83,26 @@ class Board:
             for col in {5, 11}:
                 pygame.draw.rect(win, L_BLUE, (col * SQUARE_SIZE, row * SQUARE_SIZE, (2 * OUTLINE), (2 * SQUARE_SIZE)))
 
-    def create_board(self, player1, player2):
+    def create_board(self):
         board = []
         for row in range(0, self.rows):
             n_row = []
             for col in range(0, self.cols):
-                if row in {0, 1} and col in {0, 1, 2, 3, 4}:
+                if (row, col) in RED_BASE:
                     checker = Checker(row, col, RED)
-                    player1.add_checker(checker)
+                    self.player1.add_checker(checker)
                     n_row.append(checker)
-                elif row == 2 and col in {0, 1, 2, 3}:
-                    checker = Checker(row, col, RED)
-                    player1.add_checker(checker)
-                    n_row.append(checker)
-                elif row == 3 and col in {0, 1, 2}:
-                    checker = Checker(row, col, RED)
-                    player1.add_checker(checker)
-                    n_row.append(checker)
-                elif row == 4 and col in {0, 1}:
-                    checker = Checker(row, col, RED)
-                    player1.add_checker(checker)
-                    n_row.append(checker)
-                elif row == 11 and col in {14, 15}:
+                elif (row, col) in BLUE_BASE:
                     checker = Checker(row, col, BLUE)
-                    player2.add_checker(checker)
+                    self.player2.add_checker(checker)
                     n_row.append(checker)
-                elif row == 12 and col in {13, 14, 15}:
-                    checker = Checker(row, col, BLUE)
-                    player2.add_checker(checker)
+                elif (row, col) in GREEN_BASE and self.player3:
+                    checker = Checker(row, col, GREEN)
+                    self.player3.add_checker(checker)
                     n_row.append(checker)
-                elif row == 13 and col in {12, 13, 14, 15}:
-                    checker = Checker(row, col, BLUE)
-                    player2.add_checker(checker)
-                    n_row.append(checker)
-                elif row in {14, 15} and col in {11, 12, 13, 14, 15}:
-                    checker = Checker(row, col, BLUE)
-                    player2.add_checker(checker)
+                elif (row, col) in YELLOW_BASE and self.player4:
+                    checker = Checker(row, col, YELLOW)
+                    self.player4.add_checker(checker)
                     n_row.append(checker)
                 else:
                     n_row.append(0)
