@@ -2,7 +2,7 @@ import pygame
 from constants import *
 
 class Checker:
-    def __init__(self, row, col, color):
+    def __init__(self, row, col, color, home_base, target_base):
         self.row = row
         self.col = col
         self.x = 0
@@ -14,21 +14,8 @@ class Checker:
         self.home = True
         self.useless_moves = []
         self.made_moves = []
-        if self.color == RED:
-            self.home_base = RED_BASE
-            self.target_base = BLUE_BASE
-
-        if self.color == BLUE:
-            self.home_base = BLUE_BASE
-            self.target_base = RED_BASE
-
-        if self.color == YELLOW:
-            self.home_base = YELLOW_BASE
-            self.target_base = GREEN_BASE
-
-        if self.color == GREEN:
-            self.home_base = GREEN_BASE
-            self.target_base = YELLOW_BASE
+        self.home_base = home_base
+        self.target_base = target_base
 
     def add_useless_move(self, move):
         self.useless_moves.append(move)
@@ -50,10 +37,12 @@ class Checker:
     def draw(self, win):
         self.update_status()
         if self.selected:
-            color = GREEN
+            color = L_GREEN
+            pygame.draw.circle(win, D_GREEN, (self.x, self.y), SQUARE_SIZE//2 - 4)
         elif not self.selected:
             color = BLACK
             if self.target:
+                pygame.draw.circle(win, D_BLUE, (self.x, self.y), SQUARE_SIZE//2 - 4)
                 color = L_BLUE
 
         pygame.draw.circle(win, color, (self.x, self.y), SQUARE_SIZE//2 - BORDER)

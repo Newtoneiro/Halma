@@ -65,8 +65,12 @@ def main():
                             game.selected_checker().change_selected(False)
                             game.change_selected_checker(0)
                             if game.turn == RED:
+                                pygame.display.set_caption('Halma, YELLOW')
+                            elif game.turn == YELLOW:
                                 pygame.display.set_caption('Halma, BLUE')
                             elif game.turn == BLUE:
+                                pygame.display.set_caption('Halma, GREEN')
+                            elif game.turn == GREEN:
                                 pygame.display.set_caption('Halma, RED')
                             game.change_turn()
         if game.result:

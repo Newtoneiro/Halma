@@ -6,14 +6,18 @@ class Board:
     def __init__(self, player1, player2, player3=None, player4=None):
         self.rows = ROWS
         self.cols = COLS
-        if player3:
+        self.RED_BASE = RED_BASE
+        self.BLUE_BASE = BLUE_BASE
+        self.GREEN_BASE = GREEN_BASE
+        self.YELLOW_BASE = YELLOW_BASE
+        if player3 and player4:
             self.player3 = player3
-        else:
-            self.player3 = None
-        if player4:
             self.player4 = player4
         else:
+            self.player3 = None
             self.player4 = None
+            self.RED_BASE = RED_BASE_2
+            self.BLUE_BASE = BLUE_BASE_2
         self.player1 = player1
         self.player2 = player2
         self.create_board()
@@ -24,7 +28,7 @@ class Board:
         for row in range(0, ROWS):
             for col in range(row % 2, ROWS, 2):
                 pygame.draw.rect(win, BLACK, (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE + OUTLINE, SQUARE_SIZE + OUTLINE))
-                pygame.draw.rect(win, YELLOW, (col * SQUARE_SIZE + OUTLINE, row * SQUARE_SIZE + OUTLINE, (SQUARE_SIZE - OUTLINE), (SQUARE_SIZE - OUTLINE)))
+                pygame.draw.rect(win, WHITE, (col * SQUARE_SIZE + OUTLINE, row * SQUARE_SIZE + OUTLINE, (SQUARE_SIZE - OUTLINE), (SQUARE_SIZE - OUTLINE)))
 
         # These funny lines
         for row in {4, 12}:
@@ -88,20 +92,20 @@ class Board:
         for row in range(0, self.rows):
             n_row = []
             for col in range(0, self.cols):
-                if (row, col) in RED_BASE:
-                    checker = Checker(row, col, RED)
+                if (row, col) in self.RED_BASE:
+                    checker = Checker(row, col, RED, self.RED_BASE.copy(), self.BLUE_BASE.copy())
                     self.player1.add_checker(checker)
                     n_row.append(checker)
-                elif (row, col) in BLUE_BASE:
-                    checker = Checker(row, col, BLUE)
+                elif (row, col) in self.BLUE_BASE:
+                    checker = Checker(row, col, BLUE, self.BLUE_BASE.copy(), self.RED_BASE.copy())
                     self.player2.add_checker(checker)
                     n_row.append(checker)
-                elif (row, col) in GREEN_BASE and self.player3:
-                    checker = Checker(row, col, GREEN)
+                elif (row, col) in self.GREEN_BASE and self.player3:
+                    checker = Checker(row, col, GREEN, self.GREEN_BASE.copy(), self.YELLOW_BASE.copy())
                     self.player3.add_checker(checker)
                     n_row.append(checker)
-                elif (row, col) in YELLOW_BASE and self.player4:
-                    checker = Checker(row, col, YELLOW)
+                elif (row, col) in self.YELLOW_BASE and self.player4:
+                    checker = Checker(row, col, YELLOW, self.YELLOW_BASE.copy(), self.GREEN_BASE.copy())
                     self.player4.add_checker(checker)
                     n_row.append(checker)
                 else:
@@ -291,10 +295,15 @@ class Board:
     def valid_moves(self, checker):
         possible_moves = self.check_all_directions(checker.row, checker.col)
         jumped_moves = self.check_jump_all_directions(checker.row, checker.col)
-        if checker.target:         # once target enters enemy base, it cannot leave it
-            base = RED_BASE
+        if checker.target:
+            if checker.color == BLUE:        # once target enters enemy base, it cannot leave it
+                base = self.RED_BASE
             if checker.color == RED:
-                base = BLUE_BASE
+                base = self.BLUE_BASE
+            if checker.color == GREEN:
+                base = self.YELLOW_BASE
+            if checker.color == YELLOW:
+                base = self.GREEN_BASE
             possible_moves_in_base = []
             jumped_moves_in_base = []
             for move in possible_moves:
@@ -305,6 +314,27 @@ class Board:
                     jumped_moves_in_base.append(jump)
             possible_moves = possible_moves_in_base
             jumped_moves = jumped_moves_in_base
+
+        if checker.color == RED or checker.color == BLUE:
+            forbidden_moves =  self.GREEN_BASE + self.YELLOW_BASE
+        if checker.color == GREEN or checker.color == YELLOW:     # Player can only enter enemy base if he leaves it in the same turn
+            forbidden_moves = self.RED_BASE + self.BLUE_BASE
+
+        bad_moves = []
+        for move in possible_moves:
+            if move in forbidden_moves:
+               bad_moves.append(move)
+        if bad_moves:
+            for move in bad_moves:
+                possible_moves.remove(move)
+
+        bad_jumps = []
+        for jump in jumped_moves:
+            if jump in forbidden_moves:
+                bad_jumps.append(jump)
+        if bad_jumps:
+            for jump in bad_jumps:
+                jumped_moves.remove(jump)
 
         return possible_moves + jumped_moves
 
@@ -327,7 +357,8 @@ class Board:
         for element in valid_moves:
             if element:
                 row, col = element[0], element[1]
-                pygame.draw.circle(win, GREEN, (col*SQUARE_SIZE + SQUARE_SIZE//2, row*SQUARE_SIZE + SQUARE_SIZE//2), 5)
+                pygame.draw.circle(win, D_GREEN, (col*SQUARE_SIZE + SQUARE_SIZE//2, row*SQUARE_SIZE + SQUARE_SIZE//2), 7)
+                pygame.draw.circle(win, L_GREEN, (col*SQUARE_SIZE + SQUARE_SIZE//2, row*SQUARE_SIZE + SQUARE_SIZE//2), 5)
 
     def get_checker(self, row, col):
         return self.board[row][col]

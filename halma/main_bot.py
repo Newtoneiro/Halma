@@ -27,13 +27,16 @@ def transfer_into_rows_and_cols(x, y):
 def main():
     run = True
     clock = pygame.time.Clock()
-    player1 = EasyBot('Arnold', RED)
-    player2 = EasyBot('Bot', BLUE)
-    board = Board(player1, player2)
+    player1 = Bot('Arnold', RED)
+    player2 = Bot('Bot', BLUE)
+    player3 = Bot('Bot3', GREEN)
+    player4 = Bot('Bot4', YELLOW)
+    board = Board(player1, player2, player3, player4)
     game = Game(WIN, board)
-    player1.add_game(game)
-    player2.add_game(game)
-
+    game.board().player1.add_game(game)
+    game.board().player2.add_game(game)
+    game.board().player3.add_game(game)
+    game.board().player4.add_game(game)
 
     while run:
         clock.tick(FPS)
@@ -75,7 +78,6 @@ def main():
                 move = player1.best_move(checker, leng)
                 game.board().move_checker(checker, move[0], move[1])
                 game.change_turn()
-                time.sleep(0.1)
 
             elif game.turn == BLUE:
                 player2.make_moves_dict()
@@ -84,6 +86,20 @@ def main():
                 game.board().move_checker(checker, move[0], move[1])
                 game.change_turn()
 
+            elif game.turn == GREEN:
+                player3.make_moves_dict()
+                checker, leng = player3.best_checker_with_move_len()
+                move = player3.best_move(checker, leng)
+                game.board().move_checker(checker, move[0], move[1])
+                game.change_turn()
+
+            elif game.turn == YELLOW:
+                player4.make_moves_dict()
+                checker, leng = player4.best_checker_with_move_len()
+                move = player4.best_move(checker, leng)
+                game.board().move_checker(checker, move[0], move[1])
+                game.change_turn()
+        time.sleep(0)
 
         if game.result:
             run = False

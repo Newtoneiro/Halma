@@ -22,6 +22,9 @@ class Game:
             pygame.quit()
 
     def check_win(self):
+        target_score = 19
+        if self.board().player3 and self.board().player4:
+            target_score = 13
         player1_score = 0
         player2_score = 0
         player3_score = 0
@@ -58,14 +61,14 @@ class Game:
                     if checker.home:
                         player4_score += 1
 
-        if player1_score == 19:
+        if player1_score == target_score:
             self.result = self.board().player1
-        if player2_score == 19:
+        if player2_score == target_score:
             self.result = self.board().player2
         if self.board().player3 and self.board().player4:
-            if player3_score == 19:
+            if player3_score == target_score:
                 self.result = self.board().player3
-            if player4_score == 19:
+            if player4_score == target_score:
                 self.result = self.board().player4
         if self.result:
             print(f'The winner is {self.result.name}')
@@ -79,10 +82,10 @@ class Game:
     def change_turn(self):
         if self.board().player3 and self.board().player4:
             if self.turn == RED:
-                self.turn = BLUE
-            elif self.turn == BLUE:
                 self.turn = YELLOW
             elif self.turn == YELLOW:
+                self.turn = BLUE
+            elif self.turn == BLUE:
                 self.turn = GREEN
             elif self.turn == GREEN:
                 self.turn = RED
@@ -120,20 +123,20 @@ class Bot(Player):
                 current_pos = math.sqrt((checker.row + 1) ** 2 + (checker.col + 1) ** 2)
             if self.colour == RED:
                 current_pos = math.sqrt((16 - checker.row) ** 2 + (16 - checker.col) ** 2)
-            if self.colour == GREEN:
-                current_pos = math.sqrt((16 - checker.row) ** 2 + (checker.col) ** 2)
             if self.colour == YELLOW:
-                current_pos = math.sqrt((checker.row) ** 2 + (16 - checker.col) ** 2)
+                current_pos = math.sqrt((16 - checker.row) ** 2 + (checker.col + 1) ** 2)
+            if self.colour == GREEN:
+                current_pos = math.sqrt((checker.row + 1) ** 2 + (16 - checker.col) ** 2)
             moves = [move for move in self.game.board().valid_moves(checker) if move and move not in checker.useless_moves]
             for move in moves:
                 if self.colour == BLUE:
                     moves_dict[current_pos - math.sqrt((move[0] + 1) ** 2 + (move[1] + 1) ** 2)] = (checker, move)
                 elif self.colour == RED:
                     moves_dict[current_pos - math.sqrt((16 - move[0]) ** 2 + (16 - move[1]) ** 2)] = (checker, move)
-                elif self.colour == GREEN:
-                    moves_dict[current_pos - math.sqrt((16 - move[0]) ** 2 + (move[1]) ** 2)] = (checker, move)
                 elif self.colour == YELLOW:
-                    moves_dict[current_pos - math.sqrt((move[0]) ** 2 + (16 - move[1]) ** 2)] = (checker, move)
+                    moves_dict[current_pos - math.sqrt((16 - move[0]) ** 2 + (move[1] + 1) ** 2)] = (checker, move)
+                elif self.colour == GREEN:
+                    moves_dict[current_pos - math.sqrt((move[0] + 1) ** 2 + (16 - move[1]) ** 2)] = (checker, move)
         self.moves_dict = moves_dict
 
     def best_checker_with_move_len(self):
@@ -145,13 +148,13 @@ class Bot(Player):
     def best_move(self, checker, best_len):
         if checker.target:
             if self.colour == BLUE:
-                current_pos = math.sqrt(checker.row ** 2 + checker.col ** 2)
+                current_pos = math.sqrt((checker.row + 1) ** 2 + (checker.col + 1) ** 2)
             if self.colour == RED:
-                current_pos = math.sqrt((16-checker.row) ** 2 + (16 - checker.col) ** 2)
-            if self.colour == GREEN:
-                current_pos = math.sqrt((16 - checker.row) ** 2 + (checker.col) ** 2)
+                current_pos = math.sqrt((16 - checker.row) ** 2 + (16 - checker.col) ** 2)
             if self.colour == YELLOW:
-                current_pos = math.sqrt((checker.row) ** 2 + (16 - checker.col) ** 2)
+                current_pos = math.sqrt((16 - checker.row) ** 2 + (checker.col + 1) ** 2)
+            if self.colour == GREEN:
+                current_pos = math.sqrt((checker.row + 1) ** 2 + (16 - checker.col) ** 2)
 
             if best_len < current_pos:
                 move = self.moves_dict[best_len][1]
@@ -164,7 +167,10 @@ class Bot(Player):
             move = self.moves_dict[best_len][1]
 
         if move in checker.made_moves:
-            move = (move[1], move[0])
+            if checker.color == RED or checker.color == BLUE:
+                move = (move[1], move[0])
+            else:
+                move = move
         checker.add_made_move(move)
 
         return move
@@ -184,12 +190,20 @@ class EasyBot(Player):
             current_pos = math.sqrt((checker.row + 1) ** 2 + (checker.col + 1) ** 2)
         if self.colour == RED:
             current_pos = math.sqrt((16 - checker.row) ** 2 + (16 - checker.col) ** 2)
+        if self.colour == YELLOW:
+            current_pos = math.sqrt((16 - checker.row) ** 2 + (checker.col + 1) ** 2)
+        if self.colour == GREEN:
+            current_pos = math.sqrt((checker.row + 1) ** 2 + (16 - checker.col) ** 2)
 
         for move in moves:
             if self.colour == BLUE:
                 moves_dict[current_pos - math.sqrt((move[0] + 1) ** 2 + (move[1] + 1) ** 2)] = (checker, move)
             elif self.colour == RED:
                 moves_dict[current_pos - math.sqrt((16 - move[0]) ** 2 + (16 - move[1]) ** 2)] = (checker, move)
+            elif self.colour == YELLOW:
+                moves_dict[current_pos - math.sqrt((16 - move[0]) ** 2 + (move[1] + 1) ** 2)] = (checker, move)
+            elif self.colour == GREEN:
+                moves_dict[current_pos - math.sqrt((move[0] + 1) ** 2 + (16 - move[1]) ** 2)] = (checker, move)
         self.moves_dict = moves_dict
 
     def best_checker_with_move_len(self):
@@ -201,14 +215,17 @@ class EasyBot(Player):
     def best_move(self, checker, best_len):
         if checker.target:
             if self.colour == BLUE:
-                current_pos = math.sqrt(checker.row ** 2 + checker.col ** 2)
+                current_pos = math.sqrt((checker.row + 1) ** 2 + (checker.col + 1) ** 2)
             if self.colour == RED:
                 current_pos = math.sqrt((16-checker.row) ** 2 + (16 - checker.col) ** 2)
+            if self.colour == YELLOW:
+                current_pos = math.sqrt((16 - checker.row) ** 2 + (checker.col + 1) ** 2)
+            if self.colour == GREEN:
+                current_pos = math.sqrt((checker.row + 1) ** 2 + (16 - checker.col) ** 2)
 
             if best_len < current_pos:
                 move = self.moves_dict[best_len][1]
-            else:
-                self.moves_dict.pop(best_len)
+            if best_len < 0:
                 checker, best_len = self.best_checker_with_move_len()
                 move = self.best_move(checker, best_len)
 
