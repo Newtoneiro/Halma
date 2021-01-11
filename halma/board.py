@@ -3,7 +3,7 @@ from constants import *
 from checker import Checker
 
 class Board:
-    def __init__(self, player1, player2, player3=None, player4=None):
+    def __init__(self, win, player1, player2, player3=None, player4=None):
         self.rows = ROWS
         self.cols = COLS
         self.RED_BASE = RED_BASE
@@ -21,6 +21,11 @@ class Board:
         self.player1 = player1
         self.player2 = player2
         self.create_board()
+        self.win = win
+        self.moves_paths = {}
+
+    def moves_paths_clear(self):
+        self.moves_paths = {}
 
     def draw_squares(self, win):
         win.fill(BLACK)
@@ -228,24 +233,8 @@ class Board:
     def check_jump_all_directions(self, row, col, already_jumped=None):
         if not already_jumped:
             already_jumped = []
-        jumped_moves = []
+        jumped_moves = self.get_all_jumps_from_square(row, col)
         jumped_moves += already_jumped
-        if self.check_jump_up(row, col):
-            jumped_moves.append(self.check_jump_up(row, col))
-        if self.check_jump_down(row, col):
-            jumped_moves.append(self.check_jump_down(row, col))
-        if self.check_jump_left(row, col):
-            jumped_moves.append(self.check_jump_left(row, col))
-        if self.check_jump_right(row, col):
-            jumped_moves.append(self.check_jump_right(row, col))
-        if self.check_jump_up_left(row, col):
-            jumped_moves.append(self.check_jump_up_left(row, col))
-        if self.check_jump_up_right(row, col):
-            jumped_moves.append(self.check_jump_up_right(row, col))
-        if self.check_jump_down_left(row, col):
-            jumped_moves.append(self.check_jump_down_left(row, col))
-        if self.check_jump_down_right(row, col):
-            jumped_moves.append(self.check_jump_down_right(row, col))
 
         for move in jumped_moves:
             if move not in already_jumped:
@@ -255,42 +244,87 @@ class Board:
                         jumped_moves.append(move)
         return jumped_moves
 
-    def get_possible_swaps(self, checker):
-        possible_swaps = []
-        if col >= COLS - 1:
-            if self.get_checker(row, col+1):
-                possible_swaps.append(row, col+1)
+    def get_all_jumps_from_square(self, row, col):
+        jumped_moves = []
+        if self.check_jump_up(row, col):
+            jumped_moves.append(self.check_jump_up(row, col))
+        if self.check_jump_up_left(row, col):
+            jumped_moves.append(self.check_jump_up_left(row, col))
+        if self.check_jump_left(row, col):
+            jumped_moves.append(self.check_jump_left(row, col))
+        if self.check_jump_down_left(row, col):
+            jumped_moves.append(self.check_jump_down_left(row, col))
+        if self.check_jump_down(row, col):
+            jumped_moves.append(self.check_jump_down(row, col))
+        if self.check_jump_down_right(row, col):
+            jumped_moves.append(self.check_jump_down_right(row, col))
+        if self.check_jump_right(row, col):
+            jumped_moves.append(self.check_jump_right(row, col))
+        if self.check_jump_up_right(row, col):
+            jumped_moves.append(self.check_jump_up_right(row, col))
+        for jump in jumped_moves:
+            if not jump:
+                jumped_moves.remove(jump)
+        return jumped_moves
 
-        if col <= 0:
-            if self.get_checker(row, col-1):
-                possible_swaps.append(row, col-1)
+    def get_path(self, start, finish):
+        moves_close_start = self.check_all_directions(start[0], start[1])
+        jumped_moves_start = self.check_jump_all_directions(start[0], start[1])
+        moves_close_finish = self.check_all_directions(finish[0], finish[1])
+        jumped_moves_finish = self.check_jump_all_directions(finish[0], finish[1])
+        if finish in moves_close_start:
+            return [start, finish]
+        jumps_made = [start]
+        for jump in jumped_moves_start:
+            if jump in jumped_moves_finish:
+                jumps_made.append(jump)
+                if finish in jumps_made:
+                    return jumps_made
 
-        if row >= ROWS - 1:
-            if self.get_checker(row+1, col):
-                possible_swaps.append(row+1, col)
-
-        if row <= 0:
-            if self.get_checker(row-1, col):
-                possible_swaps.append(row-1, col)
-
-        if row <= 0 or col >= COLS-1:
-            if self.get_checker(row-1, col+1):
-                possible_swaps.append(row-1, col+1)
-
-        if row <= 0 or col <= 0:
-            if self.get_checker(row-1, col-1):
-                possible_swaps.append(row-1, col-1)
-
-        if row >= ROWS-1 or col >= COLS-1:
-            if self.get_checker(row+1, col+1):
-                possible_swaps.append(row+1, col+1)
-
-        if row >= ROWS-1 or col <= 0:
-            if self.get_checker(row+1, col-1):
-                possible_swaps.append(row+1, col-1)
-
-        return possible_swaps
-
+    def cut_path(self, start, finish):
+        jumps_made = self.get_path(start, finish)
+        if finish in self.check_all_directions(start[0], start[1]):
+            return [start, finish]
+        path = []
+        moves_dict = {}
+        for move in jumps_made:
+            if move != finish:
+                path.append(move)
+                possible_jumps = self.get_all_jumps_from_square(move[0], move[1])
+                for move in path:
+                    if move in possible_jumps:
+                        possible_jumps.remove(move)
+                moves_to_remove = []
+                for valueable_move in possible_jumps:
+                    if valueable_move not in jumps_made:
+                        moves_to_remove.append(valueable_move)
+                for move_to_remove in moves_to_remove:
+                    possible_jumps.remove(move_to_remove)
+                moves_dict[move] = possible_jumps
+        run = True
+        while run:
+            keys_to_remove = []
+            for start_square in moves_dict.keys():
+                if len(moves_dict[start_square]) == 0:
+                    keys_to_remove.append(start_square)
+            for places_to_go in moves_dict.values():
+                for key in keys_to_remove:
+                    if key in places_to_go:
+                        places_to_go.remove(key)
+            for key in keys_to_remove:
+                moves_dict.pop(key)
+            if len(keys_to_remove) == 0:
+                run = False
+        for move_list in moves_dict.values():
+            for element in move_list:
+                if element != finish:
+                    if element not in moves_dict.keys():
+                        move_list.remove(element)
+        path = [start]
+        while finish not in path:
+            key = path[-1]
+            path.append(moves_dict[key][0])
+        return path
 
     def valid_moves(self, checker):
         possible_moves = self.check_all_directions(checker.row, checker.col)
@@ -338,7 +372,6 @@ class Board:
 
         return possible_moves + jumped_moves
 
-
     def check_all_directions(self, row, col):
         possible_moves = [
             self.space_down(row, col),
@@ -364,8 +397,43 @@ class Board:
         return self.board[row][col]
 
     def move_checker(self, checker, row, col):
+        self.move_checker_animate(checker, row, col)
         self.board[checker.row][checker.col], self.board[row][col] = self.board[row][col], self.board[checker.row][checker.col]
         checker.move(row, col)
+
+    def move_checker_animate(self, checker, row, col):
+        FPS = 85
+        clock = pygame.time.Clock()
+        moves_list = self.cut_path((checker.row, checker.col), (row, col))
+        x0 = checker.x
+        y0 = checker.y
+        for move in moves_list:
+            if move == (checker.row, checker.col):
+                pass
+            else:
+                y1 = move[0]*SQUARE_SIZE + SQUARE_SIZE//2
+                x1 = move[1]*SQUARE_SIZE + SQUARE_SIZE//2
+                if x1 > x0:
+                    delta_x = abs(x1 - x0)
+                else:
+                    delta_x = -abs(x1-x0)
+                if y1 > y0:
+                    delta_y = abs(y1 - y0)
+                else:
+                    delta_y = -abs(y1-y0)
+
+                checker.being_moved_change(True)
+                while (x0, y0) != (x1, y1):
+                    self.draw(self.win)
+                    x0 += delta_x//50
+                    y0 += delta_y//50
+                    pygame.draw.circle(self.win, BLACK, (x0, y0), SQUARE_SIZE//2 - BORDER)
+                    pygame.draw.circle(self.win, checker.color, (x0, y0), SQUARE_SIZE//2 - OUTLINE - BORDER)
+                    pygame.display.update()
+                    clock.tick(FPS)
+                checker.being_moved_change(False)
+                y0 = move[0]*SQUARE_SIZE + SQUARE_SIZE//2
+                x0 = move[1]*SQUARE_SIZE + SQUARE_SIZE//2
 
     def draw(self, win):
         self.draw_squares(win)

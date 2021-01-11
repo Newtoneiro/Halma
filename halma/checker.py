@@ -16,6 +16,10 @@ class Checker:
         self.made_moves = []
         self.home_base = home_base
         self.target_base = target_base
+        self.being_moved = False
+
+    def being_moved_change(self, smtgh):
+        self.being_moved = smtgh
 
     def add_useless_move(self, move):
         self.useless_moves.append(move)
@@ -35,18 +39,19 @@ class Checker:
             self.home = False
 
     def draw(self, win):
-        self.update_status()
-        if self.selected:
-            color = L_GREEN
-            pygame.draw.circle(win, D_GREEN, (self.x, self.y), SQUARE_SIZE//2 - 4)
-        elif not self.selected:
-            color = BLACK
-            if self.target:
-                pygame.draw.circle(win, D_BLUE, (self.x, self.y), SQUARE_SIZE//2 - 4)
-                color = L_BLUE
+        if not self.being_moved:
+            self.update_status()
+            if self.selected:
+                color = L_GREEN
+                pygame.draw.circle(win, D_GREEN, (self.x, self.y), SQUARE_SIZE//2 - 4)
+            elif not self.selected:
+                color = BLACK
+                if self.target:
+                    pygame.draw.circle(win, D_BLUE, (self.x, self.y), SQUARE_SIZE//2 - 4)
+                    color = L_BLUE
 
-        pygame.draw.circle(win, color, (self.x, self.y), SQUARE_SIZE//2 - BORDER)
-        pygame.draw.circle(win, self.color, (self.x, self.y), SQUARE_SIZE//2 - OUTLINE - BORDER)
+            pygame.draw.circle(win, color, (self.x, self.y), SQUARE_SIZE//2 - BORDER)
+            pygame.draw.circle(win, self.color, (self.x, self.y), SQUARE_SIZE//2 - OUTLINE - BORDER)
 
     def change_target(self):
         if self.target:

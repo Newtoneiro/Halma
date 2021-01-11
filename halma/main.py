@@ -29,12 +29,12 @@ def main():
     player2 = Player('Boczek', BLUE)
     player3 = Player('Boczek', GREEN)
     player4 = Player('Boczek', YELLOW)
-    board = Board(player1, player2, player3, player4)
+    board = Board(WIN, player1, player2)
     game = Game(WIN, board)
     game.board().player1.add_game(game)
     game.board().player2.add_game(game)
-    game.board().player3.add_game(game)
-    game.board().player4.add_game(game)
+    # game.board().player3.add_game(game)
+    # game.board().player4.add_game(game)
 
     while run:
         clock.tick(FPS)
@@ -72,7 +72,7 @@ def main():
                                 pygame.display.set_caption('Halma, GREEN')
                             elif game.turn == GREEN:
                                 pygame.display.set_caption('Halma, RED')
-                            game.change_turn()
+                            # game.change_turn()
         if game.result:
             run = False
 
