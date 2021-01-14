@@ -21,6 +21,9 @@ class Game:
         else:
             pygame.quit()
 
+    def choose_animate(self, value):
+        self.board().animations = value
+
     def check_win(self):
         target_score = 19
         if self.board().player3 and self.board().player4:
@@ -213,24 +216,4 @@ class EasyBot(Player):
         return checker, best_len
 
     def best_move(self, checker, best_len):
-        if checker.target:
-            if self.colour == BLUE:
-                current_pos = math.sqrt((checker.row + 1) ** 2 + (checker.col + 1) ** 2)
-            if self.colour == RED:
-                current_pos = math.sqrt((16-checker.row) ** 2 + (16 - checker.col) ** 2)
-            if self.colour == YELLOW:
-                current_pos = math.sqrt((16 - checker.row) ** 2 + (checker.col + 1) ** 2)
-            if self.colour == GREEN:
-                current_pos = math.sqrt((checker.row + 1) ** 2 + (16 - checker.col) ** 2)
-
-            if best_len < current_pos:
-                move = self.moves_dict[best_len][1]
-            if best_len < 0:
-                checker, best_len = self.best_checker_with_move_len()
-                move = self.best_move(checker, best_len)
-
-        elif not checker.target:
-            move = self.moves_dict[best_len][1]
-
-        return move
-
+        return self.moves_dict[best_len][1]

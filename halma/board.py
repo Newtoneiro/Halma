@@ -23,6 +23,9 @@ class Board:
         self.create_board()
         self.win = win
         self.moves_paths = {}
+        self.animations = True
+        self.animation_speed = (HEIGHT * 50)// 800
+        self.get_jump_sounds()
 
     def moves_paths_clear(self):
         self.moves_paths = {}
@@ -397,9 +400,34 @@ class Board:
         return self.board[row][col]
 
     def move_checker(self, checker, row, col):
-        self.move_checker_animate(checker, row, col)
+        if self.animations:
+            self.move_checker_animate(checker, row, col)
         self.board[checker.row][checker.col], self.board[row][col] = self.board[row][col], self.board[checker.row][checker.col]
         checker.move(row, col)
+
+    def get_jump_sounds(self):
+        jumpsound0 = pygame.mixer.Sound('./jumpsounds/jump0.wav')
+        jumpsound1 = pygame.mixer.Sound('./jumpsounds/jump1.wav')
+        jumpsound2 = pygame.mixer.Sound('./jumpsounds/jump2.wav')
+        jumpsound3 = pygame.mixer.Sound('./jumpsounds/jump3.wav')
+        jumpsound4 = pygame.mixer.Sound('./jumpsounds/jump4.wav')
+        jumpsound5 = pygame.mixer.Sound('./jumpsounds/jump5.wav')
+        jumpsound6 = pygame.mixer.Sound('./jumpsounds/jump6.wav')
+        jumpsound7 = pygame.mixer.Sound('./jumpsounds/jump7.wav')
+        jumpsound8 = pygame.mixer.Sound('./jumpsounds/jump8.wav')
+        self.jumpsounds = [
+            jumpsound0,
+            jumpsound1,
+            jumpsound2,
+            jumpsound3,
+            jumpsound4,
+            jumpsound5,
+            jumpsound6,
+            jumpsound7,
+            jumpsound8
+        ]
+
+
 
     def move_checker_animate(self, checker, row, col):
         FPS = 85
@@ -407,7 +435,10 @@ class Board:
         moves_list = self.cut_path((checker.row, checker.col), (row, col))
         x0 = checker.x
         y0 = checker.y
+        sound_count = -1
         for move in moves_list:
+            if sound_count != 8:
+                sound_count += 1
             if move == (checker.row, checker.col):
                 pass
             else:
@@ -425,8 +456,8 @@ class Board:
                 checker.being_moved_change(True)
                 while (x0, y0) != (x1, y1):
                     self.draw(self.win)
-                    x0 += delta_x//50
-                    y0 += delta_y//50
+                    x0 += delta_x//self.animation_speed
+                    y0 += delta_y//self.animation_speed
                     pygame.draw.circle(self.win, BLACK, (x0, y0), SQUARE_SIZE//2 - BORDER)
                     pygame.draw.circle(self.win, checker.color, (x0, y0), SQUARE_SIZE//2 - OUTLINE - BORDER)
                     pygame.display.update()
@@ -434,6 +465,7 @@ class Board:
                 checker.being_moved_change(False)
                 y0 = move[0]*SQUARE_SIZE + SQUARE_SIZE//2
                 x0 = move[1]*SQUARE_SIZE + SQUARE_SIZE//2
+                self.jumpsounds[sound_count].play()
 
     def draw(self, win):
         self.draw_squares(win)
@@ -444,3 +476,5 @@ class Board:
                     checker.draw(win)
                     if checker.selected:
                         self.draw_valid_moves_indicators(checker, win)
+
+
