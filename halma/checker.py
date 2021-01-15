@@ -2,7 +2,8 @@ import pygame
 from constants import *
 
 class Checker:
-    def __init__(self, row, col, color, home_base, target_base):
+    def __init__(self, row, col, color, home_base, target_base, SQUARE_SIZE):
+        self.SQUARE_SIZE = SQUARE_SIZE
         self.row = row
         self.col = col
         self.x = 0
@@ -43,15 +44,15 @@ class Checker:
             self.update_status()
             if self.selected:
                 color = L_GREEN
-                pygame.draw.circle(win, D_GREEN, (self.x, self.y), SQUARE_SIZE//2 - 4)
+                pygame.draw.circle(win, D_GREEN, (self.x, self.y), self.SQUARE_SIZE//2 - 4)
             elif not self.selected:
                 color = BLACK
                 if self.target:
-                    pygame.draw.circle(win, D_BLUE, (self.x, self.y), SQUARE_SIZE//2 - 4)
+                    pygame.draw.circle(win, D_BLUE, (self.x, self.y), self.SQUARE_SIZE//2 - 4)
                     color = L_BLUE
 
-            pygame.draw.circle(win, color, (self.x, self.y), SQUARE_SIZE//2 - BORDER)
-            pygame.draw.circle(win, self.color, (self.x, self.y), SQUARE_SIZE//2 - OUTLINE - BORDER)
+            pygame.draw.circle(win, color, (self.x, self.y), self.SQUARE_SIZE//2 - BORDER)
+            pygame.draw.circle(win, self.color, (self.x, self.y), self.SQUARE_SIZE//2 - OUTLINE - BORDER)
 
     def change_target(self):
         if self.target:
@@ -66,8 +67,8 @@ class Checker:
             self.home = True
 
     def get_position(self):
-        self.x = self.col * SQUARE_SIZE + SQUARE_SIZE//2
-        self.y = self.row * SQUARE_SIZE + SQUARE_SIZE//2
+        self.x = self.col * self.SQUARE_SIZE + self.SQUARE_SIZE//2
+        self.y = self.row * self.SQUARE_SIZE + self.SQUARE_SIZE//2
 
     def move(self, row, col):
         self.row = row

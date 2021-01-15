@@ -3,7 +3,8 @@ from constants import *
 from checker import Checker
 
 class Board:
-    def __init__(self, win, player1, player2, player3=None, player4=None):
+    def __init__(self, SQUARE_SIZE, win, player1, player2, player3=None, player4=None):
+        self.SQUARE_SIZE = SQUARE_SIZE
         self.rows = ROWS
         self.cols = COLS
         self.RED_BASE = RED_BASE
@@ -35,65 +36,65 @@ class Board:
         pygame.draw.rect(win, GREY, (OUTLINE, OUTLINE,(WIDTH - OUTLINE), (HEIGHT - OUTLINE)) )
         for row in range(0, ROWS):
             for col in range(row % 2, ROWS, 2):
-                pygame.draw.rect(win, BLACK, (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE + OUTLINE, SQUARE_SIZE + OUTLINE))
-                pygame.draw.rect(win, WHITE, (col * SQUARE_SIZE + OUTLINE, row * SQUARE_SIZE + OUTLINE, (SQUARE_SIZE - OUTLINE), (SQUARE_SIZE - OUTLINE)))
+                pygame.draw.rect(win, BLACK, (col * self.SQUARE_SIZE, row * self.SQUARE_SIZE, self.SQUARE_SIZE + OUTLINE, self.SQUARE_SIZE + OUTLINE))
+                pygame.draw.rect(win, WHITE, (col * self.SQUARE_SIZE + OUTLINE, row * self.SQUARE_SIZE + OUTLINE, (self.SQUARE_SIZE - OUTLINE), (self.SQUARE_SIZE - OUTLINE)))
 
         # These funny lines
         for row in {4, 12}:
             for col in {0, 14}:
-                pygame.draw.rect(win, RED, (col * SQUARE_SIZE, row * SQUARE_SIZE, (2 * SQUARE_SIZE), (2* OUTLINE)))
+                pygame.draw.rect(win, RED, (col * self.SQUARE_SIZE, row * self.SQUARE_SIZE, (2 * self.SQUARE_SIZE), (2* OUTLINE)))
 
         for row in {0, 14}:
             for col in {4, 12}:
-                pygame.draw.rect(win, RED, (col * SQUARE_SIZE, row * SQUARE_SIZE, (2 * OUTLINE), (2 * SQUARE_SIZE)))
+                pygame.draw.rect(win, RED, (col * self.SQUARE_SIZE, row * self.SQUARE_SIZE, (2 * OUTLINE), (2 * self.SQUARE_SIZE)))
 
         for row in {2, 14}:
             for col in {3, 12}:
-                pygame.draw.rect(win, RED, (col * SQUARE_SIZE, row * SQUARE_SIZE, (SQUARE_SIZE), (2 * OUTLINE)))
+                pygame.draw.rect(win, RED, (col * self.SQUARE_SIZE, row * self.SQUARE_SIZE, (self.SQUARE_SIZE), (2 * OUTLINE)))
 
         for row in {3, 13}:
             for col in {2, 13}:
-                pygame.draw.rect(win, RED, (col * SQUARE_SIZE, row * SQUARE_SIZE, (SQUARE_SIZE), (2 * OUTLINE)))
+                pygame.draw.rect(win, RED, (col * self.SQUARE_SIZE, row * self.SQUARE_SIZE, (self.SQUARE_SIZE), (2 * OUTLINE)))
 
         for row in {3, 12}:
             for col in {2, 14}:
-                pygame.draw.rect(win, RED, (col * SQUARE_SIZE, row * SQUARE_SIZE, (2 * OUTLINE), (SQUARE_SIZE)))
+                pygame.draw.rect(win, RED, (col * self.SQUARE_SIZE, row * self.SQUARE_SIZE, (2 * OUTLINE), (self.SQUARE_SIZE)))
 
         for row in {2, 13}:
             for col in {3, 13}:
-                pygame.draw.rect(win, RED, (col * SQUARE_SIZE, row * SQUARE_SIZE, (2 * OUTLINE), (SQUARE_SIZE)))
+                pygame.draw.rect(win, RED, (col * self.SQUARE_SIZE, row * self.SQUARE_SIZE, (2 * OUTLINE), (self.SQUARE_SIZE)))
 
         for row in {5, 11}:
             for col in {0, 14}:
-                pygame.draw.rect(win, L_BLUE, (col * SQUARE_SIZE, row * SQUARE_SIZE, (2 * SQUARE_SIZE), (2 * OUTLINE)))
+                pygame.draw.rect(win, L_BLUE, (col * self.SQUARE_SIZE, row * self.SQUARE_SIZE, (2 * self.SQUARE_SIZE), (2 * OUTLINE)))
 
         for row in {4, 11}:
             for col in {2, 14}:
-                pygame.draw.rect(win, L_BLUE, (col * SQUARE_SIZE, row * SQUARE_SIZE, (2 * OUTLINE), (SQUARE_SIZE)))
+                pygame.draw.rect(win, L_BLUE, (col * self.SQUARE_SIZE, row * self.SQUARE_SIZE, (2 * OUTLINE), (self.SQUARE_SIZE)))
 
         for row in {4, 12}:
             for col in {2, 13}:
-                pygame.draw.rect(win, L_BLUE, (col * SQUARE_SIZE, row * SQUARE_SIZE, (SQUARE_SIZE), (2 * OUTLINE)))
+                pygame.draw.rect(win, L_BLUE, (col * self.SQUARE_SIZE, row * self.SQUARE_SIZE, (self.SQUARE_SIZE), (2 * OUTLINE)))
 
         for row in {3, 12}:
             for col in {3, 13}:
-                pygame.draw.rect(win, L_BLUE, (col * SQUARE_SIZE, row * SQUARE_SIZE, (2 * OUTLINE), (SQUARE_SIZE)))
+                pygame.draw.rect(win, L_BLUE, (col * self.SQUARE_SIZE, row * self.SQUARE_SIZE, (2 * OUTLINE), (self.SQUARE_SIZE)))
 
         for row in {3, 13}:
             for col in {3, 12}:
-                pygame.draw.rect(win, L_BLUE, (col * SQUARE_SIZE, row * SQUARE_SIZE, (SQUARE_SIZE), (2 * OUTLINE)))
+                pygame.draw.rect(win, L_BLUE, (col * self.SQUARE_SIZE, row * self.SQUARE_SIZE, (self.SQUARE_SIZE), (2 * OUTLINE)))
 
         for row in {2, 13}:
             for col in {4, 12}:
-                pygame.draw.rect(win, L_BLUE, (col * SQUARE_SIZE, row * SQUARE_SIZE, (2 * OUTLINE), (SQUARE_SIZE)))
+                pygame.draw.rect(win, L_BLUE, (col * self.SQUARE_SIZE, row * self.SQUARE_SIZE, (2 * OUTLINE), (self.SQUARE_SIZE)))
 
         for row in {2, 14}:
             for col in {4, 11}:
-                pygame.draw.rect(win, L_BLUE, (col * SQUARE_SIZE, row * SQUARE_SIZE, (SQUARE_SIZE), (2 * OUTLINE)))
+                pygame.draw.rect(win, L_BLUE, (col * self.SQUARE_SIZE, row * self.SQUARE_SIZE, (self.SQUARE_SIZE), (2 * OUTLINE)))
 
         for row in {0, 14}:
             for col in {5, 11}:
-                pygame.draw.rect(win, L_BLUE, (col * SQUARE_SIZE, row * SQUARE_SIZE, (2 * OUTLINE), (2 * SQUARE_SIZE)))
+                pygame.draw.rect(win, L_BLUE, (col * self.SQUARE_SIZE, row * self.SQUARE_SIZE, (2 * OUTLINE), (2 * self.SQUARE_SIZE)))
 
     def create_board(self):
         board = []
@@ -101,19 +102,19 @@ class Board:
             n_row = []
             for col in range(0, self.cols):
                 if (row, col) in self.RED_BASE:
-                    checker = Checker(row, col, RED, self.RED_BASE.copy(), self.BLUE_BASE.copy())
+                    checker = Checker(row, col, RED, self.RED_BASE.copy(), self.BLUE_BASE.copy(), self.SQUARE_SIZE)
                     self.player1.add_checker(checker)
                     n_row.append(checker)
                 elif (row, col) in self.BLUE_BASE:
-                    checker = Checker(row, col, BLUE, self.BLUE_BASE.copy(), self.RED_BASE.copy())
+                    checker = Checker(row, col, BLUE, self.BLUE_BASE.copy(), self.RED_BASE.copy(), self.SQUARE_SIZE)
                     self.player2.add_checker(checker)
                     n_row.append(checker)
                 elif (row, col) in self.GREEN_BASE and self.player3:
-                    checker = Checker(row, col, GREEN, self.GREEN_BASE.copy(), self.YELLOW_BASE.copy())
+                    checker = Checker(row, col, GREEN, self.GREEN_BASE.copy(), self.YELLOW_BASE.copy(), self.SQUARE_SIZE)
                     self.player3.add_checker(checker)
                     n_row.append(checker)
                 elif (row, col) in self.YELLOW_BASE and self.player4:
-                    checker = Checker(row, col, YELLOW, self.YELLOW_BASE.copy(), self.GREEN_BASE.copy())
+                    checker = Checker(row, col, YELLOW, self.YELLOW_BASE.copy(), self.GREEN_BASE.copy(), self.SQUARE_SIZE)
                     self.player4.add_checker(checker)
                     n_row.append(checker)
                 else:
@@ -393,8 +394,8 @@ class Board:
         for element in valid_moves:
             if element:
                 row, col = element[0], element[1]
-                pygame.draw.circle(win, D_GREEN, (col*SQUARE_SIZE + SQUARE_SIZE//2, row*SQUARE_SIZE + SQUARE_SIZE//2), 7)
-                pygame.draw.circle(win, L_GREEN, (col*SQUARE_SIZE + SQUARE_SIZE//2, row*SQUARE_SIZE + SQUARE_SIZE//2), 5)
+                pygame.draw.circle(win, D_GREEN, (col*self.SQUARE_SIZE + self.SQUARE_SIZE//2, row*self.SQUARE_SIZE + self.SQUARE_SIZE//2), 7)
+                pygame.draw.circle(win, L_GREEN, (col*self.SQUARE_SIZE + self.SQUARE_SIZE//2, row*self.SQUARE_SIZE + self.SQUARE_SIZE//2), 5)
 
     def get_checker(self, row, col):
         return self.board[row][col]
@@ -427,7 +428,8 @@ class Board:
             jumpsound8
         ]
 
-
+    def set_mute(self, mute):
+        self.mute = mute
 
     def move_checker_animate(self, checker, row, col):
         FPS = 85
@@ -442,8 +444,8 @@ class Board:
             if move == (checker.row, checker.col):
                 pass
             else:
-                y1 = move[0]*SQUARE_SIZE + SQUARE_SIZE//2
-                x1 = move[1]*SQUARE_SIZE + SQUARE_SIZE//2
+                y1 = move[0]*self.SQUARE_SIZE + self.SQUARE_SIZE//2
+                x1 = move[1]*self.SQUARE_SIZE + self.SQUARE_SIZE//2
                 if x1 > x0:
                     delta_x = abs(x1 - x0)
                 else:
@@ -458,14 +460,15 @@ class Board:
                     self.draw(self.win)
                     x0 += delta_x//self.animation_speed
                     y0 += delta_y//self.animation_speed
-                    pygame.draw.circle(self.win, BLACK, (x0, y0), SQUARE_SIZE//2 - BORDER)
-                    pygame.draw.circle(self.win, checker.color, (x0, y0), SQUARE_SIZE//2 - OUTLINE - BORDER)
+                    pygame.draw.circle(self.win, BLACK, (x0, y0), self.SQUARE_SIZE//2 - BORDER)
+                    pygame.draw.circle(self.win, checker.color, (x0, y0), self.SQUARE_SIZE//2 - OUTLINE - BORDER)
                     pygame.display.update()
                     clock.tick(FPS)
                 checker.being_moved_change(False)
-                y0 = move[0]*SQUARE_SIZE + SQUARE_SIZE//2
-                x0 = move[1]*SQUARE_SIZE + SQUARE_SIZE//2
-                self.jumpsounds[sound_count].play()
+                y0 = move[0]*self.SQUARE_SIZE + self.SQUARE_SIZE//2
+                x0 = move[1]*self.SQUARE_SIZE + self.SQUARE_SIZE//2
+                if not self.mute:
+                    self.jumpsounds[sound_count].play()
 
     def draw(self, win):
         self.draw_squares(win)

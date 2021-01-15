@@ -89,13 +89,22 @@ class MenuAnimations():
         self.hard = pygame.image.load('./options/hard.png')
         self.off = pygame.image.load('./options/off.png')
         self.on = pygame.image.load('./options/on.png')
+        self.two = pygame.image.load('./options/2.png')
+        self.four = pygame.image.load('./options/4.png')
+        self.pvp = pygame.image.load('./options/pvp.png')
+        self.pvai = pygame.image.load('./options/pvai.png')
+        self.aivai = pygame.image.load('./options/aivai.png')
+        self.noanimations = pygame.image.load('./options/noanimations.png')
+        self.starting_player = RED
         self.tiny_window = False
         self.hard_difficulty = False
         self.mute = False
+        self.how_many_players = 2
+        self.mode = 0
+        self.animations = True
         self.state = 0
         self.theme_music()
         self.in_options = False
-        self.starting_player = RED
 
     def theme_music(self):
         pygame.mixer.music.load('./mainmenu/maintheme.wav')
@@ -133,8 +142,9 @@ class MenuAnimations():
             ]
 
     def move_checkers(self):
-        for checker in self.prompt_checkers:
-            checker.move()
+        if not self.in_options:
+            for checker in self.prompt_checkers:
+                checker.move()
 
     def update(self):
         self.make_canvas()
@@ -205,11 +215,27 @@ class MenuAnimations():
                 self.win.blit(self.off, (75, -50))
             elif self.tiny_window:
                 self.win.blit(self.on, (75, -50))
+            if self.how_many_players == 2:
+                self.win.blit(self.two, (75, -50))
+            elif self.how_many_players == 4:
+                self.win.blit(self.four, (77, -50))
+            if self.mode == 0:
+                self.win.blit(self.pvp, (77, -50))
+            elif self.mode == 1:
+                self.win.blit(self.pvai, (77, -50))
+            elif self.mode == 2:
+                self.win.blit(self.aivai, (77, -50))
+            if not self.animations:
+                self.win.blit(self.noanimations, (75, -50))
 
     def press_button(self):
+        pygame.mixer.music.set_volume(0.4)
         self.current_button = self.button_pressed
         self.current_image = self.main_sprite0
         self.current_gear = self.gear0
+        self.game = Game(self.win, self.starting_player, self.tiny_window, self.hard_difficulty, self.mute, self.how_many_players, self.mode, self.animations, 60)
+        self.game.play()
+        self.win = pygame.display.set_mode((800, 800))
         self.state = 12
 
     def press_gear(self):
@@ -228,17 +254,19 @@ class MenuAnimations():
     def change_starting_person(self, x):
         if x < 498:
             self.starting_player = RED
-        elif x >= 498 and x < 524:
+        elif x >= 498 and x < 524 and self.how_many_players == 4:
             self.starting_player = YELLOW
         elif x >= 524 and x < 550:
             self.starting_player = BLUE
-        elif x >= 550:
+        elif x >= 550 and self.how_many_players == 4:
             self.starting_player = GREEN
 
     def change_mute(self):
         if self.mute:
+            pygame.mixer.music.unpause()
             self.mute = False
         elif not self.mute:
+            pygame.mixer.music.pause()
             self.mute = True
 
     def change_difficulty(self):
@@ -251,7 +279,31 @@ class MenuAnimations():
         if self.tiny_window:
             self.tiny_window = False
         elif not self.tiny_window:
+            self.animations = False
             self.tiny_window = True
+
+    def change_how_many_players(self):
+        if self.how_many_players == 2:
+            self.how_many_players = 4
+        elif self.how_many_players == 4:
+            if self.starting_player in [YELLOW, GREEN]:
+                self.starting_player = RED
+            self.how_many_players = 2
+
+    def change_mode(self):
+        if self.mode == 0:
+            self.mode = 1
+        elif self.mode == 1:
+            self.mode = 2
+        elif self.mode == 2:
+            self.mode = 0
+
+    def change_animations(self):
+        if self.animations:
+            self.animations = False
+        elif not self.animations and not self.tiny_window:
+            self.animations = True
+
 
 def main():
     run = True
@@ -280,7 +332,12 @@ def main():
                         menu.change_difficulty()
                     if x > 500 and x < 550 and y > 320 and y < 355:
                         menu.change_tiny_window_mode()
-
+                    if x > 500 and x < 540 and y > 360 and y < 395:
+                        menu.change_how_many_players()
+                    if x > 471 and x < 575 and y > 400 and y < 430:
+                        menu.change_mode()
+                    if x > 515 and x < 540 and y > 445 and y < 470:
+                        menu.change_animations()
 
         pygame.display.update()
 
