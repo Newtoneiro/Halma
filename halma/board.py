@@ -1,9 +1,21 @@
 import pygame
-from constants import *
+from constants import ROWS, COLS, OUTLINE, BORDER, GREEN, YELLOW, BLUE, RED
+from constants import BLACK, HEIGHT, WIDTH, GREY, WHITE, L_BLUE, L_GREEN
+from constants import RED_BASE, BLUE_BASE, YELLOW_BASE, GREEN_BASE
+from constants import RED_BASE_2, BLUE_BASE_2, D_GREEN
 from checker import Checker
 
 class Board:
+    """
+    Second most important class, it's responsible for placing checkers on the board,
+    and contains information about their placements. It also calculates valid moves for
+    a player, draws and animates the board and pieces.
+    """
     def __init__(self, SQUARE_SIZE, win, player1, player2, player3=None, player4=None):
+        """
+        Initiates the board instance considering the number of players given as
+        the arguments.
+        """
         self.SQUARE_SIZE = SQUARE_SIZE
         self.rows = ROWS
         self.cols = COLS
@@ -25,15 +37,23 @@ class Board:
         self.win = win
         self.moves_paths = {}
         self.animations = True
-        self.animation_speed = (HEIGHT * 50)// 800
+        self.animation_speed = (HEIGHT * 50)//800
         self.get_jump_sounds()
 
     def moves_paths_clear(self):
+        """
+        Resets self.moves_paths, which is used buy animation function
+        """
         self.moves_paths = {}
 
     def draw_squares(self, win):
+        """
+        Draws the board and 'these funy lines' being the blue and red lines
+        you can see on the board, indicating the bases. This function,
+        aswell as the other drawing functions were each tested visually
+        """
         win.fill(BLACK)
-        pygame.draw.rect(win, GREY, (OUTLINE, OUTLINE,(WIDTH - OUTLINE), (HEIGHT - OUTLINE)) )
+        pygame.draw.rect(win, GREY, (OUTLINE, OUTLINE, (WIDTH - OUTLINE), (HEIGHT - OUTLINE)))
         for row in range(0, ROWS):
             for col in range(row % 2, ROWS, 2):
                 pygame.draw.rect(win, BLACK, (col * self.SQUARE_SIZE, row * self.SQUARE_SIZE, self.SQUARE_SIZE + OUTLINE, self.SQUARE_SIZE + OUTLINE))
@@ -42,7 +62,7 @@ class Board:
         # These funny lines
         for row in {4, 12}:
             for col in {0, 14}:
-                pygame.draw.rect(win, RED, (col * self.SQUARE_SIZE, row * self.SQUARE_SIZE, (2 * self.SQUARE_SIZE), (2* OUTLINE)))
+                pygame.draw.rect(win, RED, (col * self.SQUARE_SIZE, row * self.SQUARE_SIZE, (2 * self.SQUARE_SIZE), (2 * OUTLINE)))
 
         for row in {0, 14}:
             for col in {4, 12}:
@@ -97,6 +117,9 @@ class Board:
                 pygame.draw.rect(win, L_BLUE, (col * self.SQUARE_SIZE, row * self.SQUARE_SIZE, (2 * OUTLINE), (2 * self.SQUARE_SIZE)))
 
     def create_board(self):
+        """
+        Creates a list of rows containing lists of objects in columns of these rows.
+        """
         board = []
         for row in range(0, self.rows):
             n_row = []
@@ -121,6 +144,10 @@ class Board:
                     n_row.append(0)
             board.append(n_row)
         self.board = board
+
+    # All of the following methods are used in valid moves related functions,
+    # Each one of them is responsible for checking a single direction on the board
+    # and returning information about the move (is it valid, is there another checker on the way etc.)
 
     def space_right(self, row, col):
         if col >= COLS - 1:
@@ -234,7 +261,29 @@ class Board:
             return row+2, col+2
         return None
 
+    def check_all_directions(self, row, col):
+        """
+        Returns list of moves that are max. 1 square away from
+        starting position
+        """
+        possible_moves = [
+            self.space_down(row, col),
+            self.space_left(row, col),
+            self.space_right(row, col),
+            self.space_up(row, col),
+            self.crosswise_down_left(row, col),
+            self.crosswise_down_right(row, col),
+            self.crosswise_up_left(row, col),
+            self.crosswise_up_right(row, col),
+        ]
+        possible_moves_cut = [move for move in possible_moves if move]
+        return possible_moves_cut
+
     def check_jump_all_directions(self, row, col, already_jumped=None):
+        """
+        Recursively checks possible "jumped moves" meaning only the jumps
+        that are achieved by concussive jumping over pieces
+        """
         if not already_jumped:
             already_jumped = []
         jumped_moves = self.get_all_jumps_from_square(row, col)
@@ -249,6 +298,10 @@ class Board:
         return jumped_moves
 
     def get_all_jumps_from_square(self, row, col):
+        """
+        Checks possible jumps that are max. 2 squares away from the
+        current position
+        """
         jumped_moves = []
         if self.check_jump_up(row, col):
             jumped_moves.append(self.check_jump_up(row, col))
@@ -272,9 +325,13 @@ class Board:
         return jumped_moves
 
     def get_path(self, start, finish):
+        """
+        Function used to animate checkers' movements.
+        It's supposed to return a list of moves that further can be
+        made into an actual path
+        """
         moves_close_start = self.check_all_directions(start[0], start[1])
         jumped_moves_start = self.check_jump_all_directions(start[0], start[1])
-        moves_close_finish = self.check_all_directions(finish[0], finish[1])
         jumped_moves_finish = self.check_jump_all_directions(finish[0], finish[1])
         if finish in moves_close_start:
             return [start, finish]
@@ -286,6 +343,10 @@ class Board:
                     return jumps_made
 
     def cut_path(self, start, finish):
+        """
+        Remakes the get_path returned list so that there is only one path
+        left leading from start to finish
+        """
         jumps_made = self.get_path(start, finish)
         if finish in self.check_all_directions(start[0], start[1]):
             return [start, finish]
@@ -331,6 +392,9 @@ class Board:
         return path
 
     def valid_moves(self, checker):
+        """
+        Returns final list of valid_moves for a checker.
+        """
         possible_moves = self.check_all_directions(checker.row, checker.col)
         jumped_moves = self.check_jump_all_directions(checker.row, checker.col)
         if checker.target:
@@ -354,14 +418,14 @@ class Board:
             jumped_moves = jumped_moves_in_base
 
         if checker.color == RED or checker.color == BLUE:
-            forbidden_moves =  self.GREEN_BASE + self.YELLOW_BASE
+            forbidden_moves = self.GREEN_BASE + self.YELLOW_BASE
         if checker.color == GREEN or checker.color == YELLOW:     # Player can only enter enemy base if he leaves it in the same turn
             forbidden_moves = self.RED_BASE + self.BLUE_BASE
 
         bad_moves = []
         for move in possible_moves:
             if move in forbidden_moves:
-               bad_moves.append(move)
+                bad_moves.append(move)
         if bad_moves:
             for move in bad_moves:
                 possible_moves.remove(move)
@@ -376,20 +440,11 @@ class Board:
 
         return possible_moves + jumped_moves
 
-    def check_all_directions(self, row, col):
-        possible_moves = [
-            self.space_down(row, col),
-            self.space_left(row, col),
-            self.space_right(row, col),
-            self.space_up(row, col),
-            self.crosswise_down_left(row, col),
-            self.crosswise_down_right(row, col),
-            self.crosswise_up_left(row, col),
-            self.crosswise_up_right(row, col),
-        ]
-        return possible_moves
-
     def draw_valid_moves_indicators(self, checker, win):
+        """
+        Function drawing valid moves indicators on the board.
+        This one was tested visually.
+        """
         valid_moves = self.valid_moves(checker)
         for element in valid_moves:
             if element:
@@ -398,15 +453,24 @@ class Board:
                 pygame.draw.circle(win, L_GREEN, (col*self.SQUARE_SIZE + self.SQUARE_SIZE//2, row*self.SQUARE_SIZE + self.SQUARE_SIZE//2), 5)
 
     def get_checker(self, row, col):
+        """
+        Returns a coresponding object from self.board
+        """
         return self.board[row][col]
 
     def move_checker(self, checker, row, col):
+        """
+        Moves checker to the designated space
+        """
         if self.animations:
             self.move_checker_animate(checker, row, col)
         self.board[checker.row][checker.col], self.board[row][col] = self.board[row][col], self.board[checker.row][checker.col]
         checker.move(row, col)
 
     def get_jump_sounds(self):
+        """
+        Loads in the sounds played when a checker jumps
+        """
         jumpsound0 = pygame.mixer.Sound('./jumpsounds/jump0.wav')
         jumpsound1 = pygame.mixer.Sound('./jumpsounds/jump1.wav')
         jumpsound2 = pygame.mixer.Sound('./jumpsounds/jump2.wav')
@@ -429,9 +493,17 @@ class Board:
         ]
 
     def set_mute(self, mute):
+        """
+        Sets the value of self.mute
+        """
         self.mute = mute
 
     def move_checker_animate(self, checker, row, col):
+        """
+        Function that brings life into this borring game, makes the
+        checkers move arround in somewhat coordinated way.
+        Tested visually. A lot.
+        """
         FPS = 85
         clock = pygame.time.Clock()
         moves_list = self.cut_path((checker.row, checker.col), (row, col))
@@ -447,11 +519,11 @@ class Board:
                 y1 = move[0]*self.SQUARE_SIZE + self.SQUARE_SIZE//2
                 x1 = move[1]*self.SQUARE_SIZE + self.SQUARE_SIZE//2
                 if x1 > x0:
-                    delta_x = abs(x1 - x0)
+                    delta_x = abs(x1-x0)
                 else:
                     delta_x = -abs(x1-x0)
                 if y1 > y0:
-                    delta_y = abs(y1 - y0)
+                    delta_y = abs(y1-y0)
                 else:
                     delta_y = -abs(y1-y0)
 
@@ -471,6 +543,11 @@ class Board:
                     self.jumpsounds[sound_count].play()
 
     def draw(self, win):
+        """
+        Draws the board with all the prompts like valid moves indicators
+        and checkers themself.
+        Tested visually.
+        """
         self.draw_squares(win)
         for row in range(0, ROWS):
             for col in range(0, COLS):
@@ -479,5 +556,4 @@ class Board:
                     checker.draw(win)
                     if checker.selected:
                         self.draw_valid_moves_indicators(checker, win)
-
 

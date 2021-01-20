@@ -1,11 +1,14 @@
-from constants import *
+from constants import ROWS, GREEN, YELLOW, BLUE, RED
 from board import Board
 import pygame
-from checker import Checker
 import math
 from random import choice
 
 class Game:
+    """
+    Class that holds informations about the gamemode aswell as other
+    customizeable options, is also responsible for the playthrough.
+    """
     def __init__(self, win, starting_player, tiny_window, hard, mute, how_many_players, mode, animations, FPS):
         self.tiny_window = tiny_window
         if self.tiny_window:
@@ -31,19 +34,29 @@ class Game:
         self.FPS = FPS
 
     def transfer_into_rows_and_cols(self, x, y):
+        """
+        Transfers the coursor's x and y position into corresponding row and col on the board
+        """
         row = y//self.SQUARE_SIZE
         col = x//self.SQUARE_SIZE
         return row, col
 
     def play(self):
+        """
+        Selects the right play function depending on self.mode value.
+        All of the 3 functions were each tested manually
+        """
         if self.mode == 0:
             self.playpvp()
         elif self.mode == 1:
             self.playpvai()
-        elif self.mode ==2:
+        elif self.mode == 2:
             self.playaivai()
 
     def playpvp(self):
+        """
+        Plays the player vs player mode
+        """
         run = True
         while run:
             self.clock.tick(self.FPS)
@@ -58,6 +71,9 @@ class Game:
             self.update()
 
     def playpvai(self):
+        """
+        Plays the player vs ai mode
+        """
         run = True
         while run:
             self.clock.tick(self.FPS)
@@ -75,6 +91,9 @@ class Game:
             self.update()
 
     def playaivai(self):
+        """
+        Plays the ai vs ai mode
+        """
         run = True
         while run:
             for event in pygame.event.get():
@@ -88,6 +107,12 @@ class Game:
             self.update()
 
     def player_make_a_move(self):
+        """
+        collests the information about player's coursor placement,
+        and based on the self.selected_checker value,
+        either selects a new checker or moves the already selected one.
+        Tested manually.
+        """
         if self.selected_checker() == 0:
             x, y = pygame.mouse.get_pos()
             row, col = self.transfer_into_rows_and_cols(x, y)
@@ -111,35 +136,28 @@ class Game:
                 self.change_turn()
 
     def bot_make_a_move(self):
+        """
+        Does the ai's move.
+        """
         if self.turn == RED:
-            self.board().player1.make_moves_dict()
-            checker, leng = self.board().player1.best_checker_with_move_len()
-            move = self.board().player1.best_move(checker, leng)
-            self.board().move_checker(checker, move[0], move[1])
-            self.change_turn()
-
+            current_player = self.board().player1
         elif self.turn == BLUE:
-            self.board().player2.make_moves_dict()
-            checker, leng = self.board().player2.best_checker_with_move_len()
-            move = self.board().player2.best_move(checker, leng)
-            self.board().move_checker(checker, move[0], move[1])
-            self.change_turn()
-
+            current_player = self.board().player2
         elif self.turn == GREEN:
-            self.board().player3.make_moves_dict()
-            checker, leng = self.board().player3.best_checker_with_move_len()
-            move = self.board().player3.best_move(checker, leng)
-            self.board().move_checker(checker, move[0], move[1])
-            self.change_turn()
-
+            current_player = self.board().player3
         elif self.turn == YELLOW:
-            self.board().player4.make_moves_dict()
-            checker, leng = self.board().player4.best_checker_with_move_len()
-            move = self.board().player4.best_move(checker, leng)
-            self.board().move_checker(checker, move[0], move[1])
-            self.change_turn()
+            current_player = self.board().player4
+
+        current_player.make_moves_dict()
+        checker, leng = current_player.best_checker_with_move_len()
+        move = current_player.best_move(checker, leng)
+        self.board().move_checker(checker, move[0], move[1])
+        self.change_turn()
 
     def create_board(self):
+        """
+        Creates a board with parameters based on the selected options
+        """
         if self.mode == 0:
             player1 = Player('RED', RED)
             player2 = Player('BLUE', BLUE)
@@ -199,15 +217,28 @@ class Game:
             self._board.player4.add_game(self)
 
     def update(self):
+        """
+        Checks for self.result, draws the board with checkers, updates the display
+
+        """
         if not self.result:
             self.board().draw(self.win)
             pygame.display.update()
             self.check_win()
 
     def choose_animate(self, value):
+        """
+        Selects board animations
+        """
         self.board().animations = value
 
     def check_win(self):
+        """
+        Checks whether someone has already won under these circumstances:
+        >If a player has all of their checkers in the enemy base
+        >A Player has minimum one checker in the enemy base and the rest of the fields is filled with
+        enemy checkers
+        """
         target_score = 19
         if self.board().player3 and self.board().player4:
             target_score = 13
@@ -242,7 +273,7 @@ class Game:
                 for checker in self.board().player4.checkers:
                     if checker.home:
                         player3_score += 1
-            if player4_score > 0 :
+            if player4_score > 0:
                 for checker in self.board().player3.checkers:
                     if checker.home:
                         player4_score += 1
@@ -260,12 +291,21 @@ class Game:
             print(f'The winner is {self.result.name}')
 
     def selected_checker(self):
+        """
+        Returns self._selected_checker
+        """
         return self._selected_checker
 
     def change_selected_checker(self, checker):
+        """
+        Changes the game.selected_checker object
+        """
         self._selected_checker = checker
 
     def change_turn(self):
+        """
+        Changes the turn in fixed way
+        """
         if self.board().player3 and self.board().player4:
             if self.turn == RED:
                 self.turn = YELLOW
@@ -282,9 +322,15 @@ class Game:
                 self.turn = RED
 
     def board(self):
+        """
+        Returns self.board
+        """
         return self._board
 
 class Player():
+    """
+    Simple class containing basic info about player
+    """
     def __init__(self, name, colour, checkers=None):
         if not checkers:
             checkers = []
@@ -293,16 +339,31 @@ class Player():
         self.colour = colour
 
     def add_game(self, game):
+        """
+        Adds game instance
+        """
         self.game = game
 
     def add_checker(self, checker):
+        """
+        Adds a checker to self.checkers
+        """
         self.checkers.append(checker)
 
 class Bot(Player):
+    """
+    Hard Ai instance, calculates the best possible move on the board, then
+    implements it.
+    """
     def __init__(self, name, colour, checkers=None):
         super().__init__(name, colour, checkers)
 
     def make_moves_dict(self):
+        """
+        Creates a dictionary in which:
+        key = distance between current position and the destination
+        value = tuple of the checker assigned to the move and the move itself
+        """
         moves_dict = {}
         for checker in self.checkers:
             if self.colour == BLUE:
@@ -361,7 +422,7 @@ class Bot(Player):
 
         return move
 
-class EasyBot(Player):
+class EasyBot(Bot):
     def __init__(self, name, colour, checkers=None):
         super().__init__(name, colour, checkers)
 
@@ -391,12 +452,6 @@ class EasyBot(Player):
             elif self.colour == GREEN:
                 moves_dict[current_pos - math.sqrt((move[0] + 1) ** 2 + (16 - move[1]) ** 2)] = (checker, move)
         self.moves_dict = moves_dict
-
-    def best_checker_with_move_len(self):
-        best_len = max(self.moves_dict.keys())
-        checker = self.moves_dict[best_len][0]
-
-        return checker, best_len
 
     def best_move(self, checker, best_len):
         return self.moves_dict[best_len][1]

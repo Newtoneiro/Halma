@@ -1,12 +1,9 @@
-import os
-import sys
 import pygame
 import pygame.mixer
 from pygame.locals import *
-from constants import *
-from board import Board
-from checker import Checker
-from game import Game, Player
+from constants import ROWS, COLS, OUTLINE, BORDER, GREEN, YELLOW, BLUE, RED
+from constants import BLACK, HEIGHT, WIDTH, GREY, WHITE, SQUARE_SIZE
+from game import Game
 from random import randint
 
 FPS = 60
