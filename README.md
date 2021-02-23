@@ -1,2 +1,4 @@
 # Halma
-halma school project 1st semester
+
+Wszystko wyjaśnione w pliku dokumentacja.pdf
+
